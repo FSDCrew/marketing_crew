@@ -1,7 +1,11 @@
-from crewai import Agent, Crew, Process, Task
-from crewai.project import CrewBase, agent, crew, task
-from crewai.agents.agent_builder.base_agent import BaseAgent
+import uuid
+from datetime import datetime, timezone
 from typing import List
+
+from crewai import Agent, Crew, Process, Task
+from crewai.agents.agent_builder.base_agent import BaseAgent
+from crewai.project import CrewBase, agent, crew, task
+
 # If you want to run a snippet of code before or after the crew starts,
 # you can use the @before_kickoff and @after_kickoff decorators
 # https://docs.crewai.com/concepts/crews#example-crew-class-with-decorators
@@ -46,7 +50,7 @@ class MarketingCrew():
     def reporting_task(self) -> Task:
         return Task(
             config=self.tasks_config['reporting_task'], # type: ignore[index]
-            output_file='report.md'
+            output_file='output/report.md'
         )
 
     @crew
@@ -54,11 +58,16 @@ class MarketingCrew():
         """Creates the MarketingCrew crew"""
         # To learn how to add knowledge sources to your crew, check out the documentation:
         # https://docs.crewai.com/concepts/knowledge#what-is-knowledge
+        
+        run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        short_uuid = uuid.uuid4().hex[:8]
+        log_path = f'logs/crewrun_{run_id}_{short_uuid}.json'
+
 
         return Crew(
             agents=self.agents, # Automatically created by the @agent decorator
             tasks=self.tasks, # Automatically created by the @task decorator
-            output_log_file="logs.json",
+            output_log_file=log_path,
             process=Process.sequential,
             verbose=True,
         )

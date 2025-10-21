@@ -6,6 +6,8 @@ from crewai import Agent, Crew, Process, Task
 from crewai.agents.agent_builder.base_agent import BaseAgent
 from crewai.project import CrewBase, agent, crew, task
 
+from marketing_crew.tools.search import open_page, search_instagram, search_internet
+
 # If you want to run a snippet of code before or after the crew starts,
 # you can use the @before_kickoff and @after_kickoff decorators
 # https://docs.crewai.com/concepts/crews#example-crew-class-with-decorators
@@ -24,35 +26,77 @@ class MarketingCrew():
     # If you would like to add tools to your agents, you can learn more about it here:
     # https://docs.crewai.com/concepts/agents#agent-tools
     @agent
-    def researcher(self) -> Agent:
+    def market_researcher(self) -> Agent:
         return Agent(
-            config=self.agents_config['researcher'], # type: ignore[index]
+            config=self.agents_config["market_researcher"], # type: ignore[index]
+            tools=[
+                search_internet,
+                search_instagram,
+                open_page,
+            ],
+            verbose=True,
+        )
+
+    @agent
+    def content_strategist(self) -> Agent:
+        return Agent(
+            config=self.agents_config["content_strategist"], # type: ignore[index]
             verbose=True
         )
 
     @agent
-    def reporting_analyst(self) -> Agent:
+    def visual_creator(self) -> Agent:
         return Agent(
-            config=self.agents_config['reporting_analyst'], # type: ignore[index]
+            config=self.agents_config["visual_creator"], # type: ignore[index]
+            verbose=True,
+            allow_delegation=False,
+        )
+
+    @agent
+    def copywriter(self) -> Agent:
+        return Agent(
+            config=self.agents_config["copywriter"], # type: ignore[index]
             verbose=True
         )
-
-    # To learn more about structured task outputs,
-    # task dependencies, and task callbacks, check out the documentation:
-    # https://docs.crewai.com/concepts/tasks#overview-of-a-task
+        
     @task
-    def research_task(self) -> Task:
+    def market_research(self) -> Task:
         return Task(
-            config=self.tasks_config['research_task'], # type: ignore[index]
+            config=self.tasks_config["market_research"], # type: ignore[index]
+            agent=self.market_researcher(),
+            output_file="output/market_research.md",
         )
 
     @task
-    def reporting_task(self) -> Task:
+    def content_strategy_task(self) -> Task:
         return Task(
-            config=self.tasks_config['reporting_task'], # type: ignore[index]
-            output_file='output/report.md'
+            config=self.tasks_config["content_strategy"], # type: ignore[index]
+            agent=self.content_strategist(),
         )
 
+    @task
+    def visual_content_creation_task(self) -> Task:
+        return Task(
+            config=self.tasks_config["visual_content_creation"], # type: ignore[index]
+            agent=self.visual_creator(),
+            output_file="output/visual-content.md",
+        )
+
+    @task
+    def copywriting_task(self) -> Task:
+        return Task(
+            config=self.tasks_config["copywriting"], # type: ignore[index]
+            agent=self.copywriter(),
+        )
+
+    @task
+    def report_final_content_strategy(self) -> Task:
+        return Task(
+            config=self.tasks_config["report_final_content_strategy"], # type: ignore[index]
+            agent=self.content_strategist(),
+            output_file="output/final-content-strategy.md",
+        )
+        
     @crew
     def crew(self) -> Crew:
         """Creates the MarketingCrew crew"""

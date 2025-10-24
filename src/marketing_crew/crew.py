@@ -7,6 +7,19 @@ from crewai.agents.agent_builder.base_agent import BaseAgent
 from crewai.project import CrewBase, agent, crew, task
 
 from marketing_crew.tools.search import open_page, search_instagram, search_internet
+from marketing_crew.tools.canva import CanvaTool
+from marketing_crew.tools.orshot import CreateOrshotDesignTool
+from marketing_crew.tools.image_generator import ImageGeneratorTool
+from langchain_google_genai import ChatGoogleGenerativeAI
+from crewai.llm import LLM
+import os
+
+gemini_llm = LLM(
+    model="gemini/gemini-2.5-flash",
+    temperature=0.1,
+    google_api_key=os.getenv("GEMINI_API_KEY")
+    # provider="google"
+)
 
 # If you want to run a snippet of code before or after the crew starts,
 # you can use the @before_kickoff and @after_kickoff decorators
@@ -35,30 +48,55 @@ class MarketingCrew():
                 open_page,
             ],
             verbose=True,
+            llm=gemini_llm
         )
 
     @agent
     def content_strategist(self) -> Agent:
         return Agent(
             config=self.agents_config["content_strategist"], # type: ignore[index]
-            verbose=True
+            verbose=True,
+            llm=gemini_llm
         )
 
     @agent
     def visual_creator(self) -> Agent:
         return Agent(
             config=self.agents_config["visual_creator"], # type: ignore[index]
+            tools=[ImageGeneratorTool()],
             verbose=True,
             allow_delegation=False,
+            llm=gemini_llm
         )
 
     @agent
     def copywriter(self) -> Agent:
         return Agent(
             config=self.agents_config["copywriter"], # type: ignore[index]
-            verbose=True
+            verbose=True,
+            llm=gemini_llm
         )
-        
+    
+    # @agent
+    # def image_generator(self) -> Agent:
+    #     return Agent(
+    #         config=self.agents_config["image_generator"], # type: ignore[index]
+    #         tools=[ImageGeneratorTool()],  # <-- ADD THIS LINE
+    #         verbose=True,
+    #         allow_delegation=False,
+    #         llm=gemini_llm
+    #     )
+    
+    @agent
+    def graphic_designer(self) -> Agent:
+        return Agent(
+            config=self.agents_config["graphic_designer"], # type: ignore[index]
+            tools=[CreateOrshotDesignTool()],
+            verbose=True,
+            allow_delegation=False,
+            llm=gemini_llm
+        )
+
     @task
     def market_research(self) -> Task:
         return Task(
@@ -95,6 +133,13 @@ class MarketingCrew():
             config=self.tasks_config["report_final_content_strategy"], # type: ignore[index]
             agent=self.content_strategist(),
             output_file="output/final-content-strategy.md",
+        )
+
+    @task
+    def create_graphic_designs_task(self) -> Task:
+        return Task(
+            config=self.tasks_config["design_task"], # type: ignore[index]
+            agent=self.graphic_designer(),
         )
         
     @crew

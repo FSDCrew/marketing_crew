@@ -22,6 +22,11 @@ def run():
         'current_date': datetime.now().strftime("%Y-%m-%d"),
         'instagram_description': input('Enter the page description here: '),
         'topic_of_the_week': input('Enter the topic of the week here: '),
+        'orshot_template_id': input('Enter the Orshot template ID here: '),
+        'headline_element_id': input('Enter the element ID for the headline here: '),
+        'body_element_id': input('Enter the element ID for the body text here: '),
+        'image_element_id': input('Enter the element ID for the image here: '),
+
     }
     
     try:

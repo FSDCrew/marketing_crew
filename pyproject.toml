@@ -5,7 +5,13 @@ description = "marketing-crew using crewAI"
 authors = [{ name = "Your Name", email = "you@example.com" }]
 requires-python = ">=3.10,<3.14"
 dependencies = [
-    "crewai[tools]>=0.203.1,<1.0.0"
+    "crewai[tools]>=0.203.1,<1.0.0",
+    "langchain-google-genai",
+    "google-genai>=0.3.0",             # Required for `from google import genai`
+    "pillow>=10.0.0",                  # For image handling
+    "boto3>=1.34.0",                   # For S3 upload
+    "pydantic>=2.6.0", 
+
 ]
 
 [project.scripts]

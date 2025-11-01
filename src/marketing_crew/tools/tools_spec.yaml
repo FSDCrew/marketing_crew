@@ -1,0 +1,31 @@
+version: 1.0
+tools:
+  - name: open_instagram_posts
+    description: Opens and extracts caption and image URLs from one or more Instagram post pages.
+    input:
+      urls: string | list[string]
+      examples:
+        - ["https://www.instagram.com/p/DPdB40zk7Xr/", "https://www.instagram.com/p/DOYL6FljOVZ/", "https://www.instagram.com/p/DDYewRgyAWj/", "https://www.instagram.com/p/C0Du2wJu_5p/", "https://www.instagram.com/p/DMC23hCTlA9/", "https://www.instagram.com/p/DPQwwMMEn-Z/", "https://www.instagram.com/p/DDjsKyCzgrE/", "https://www.instagram.com/p/DQLp9BgEQYF/", "https://www.instagram.com/p/DDgb09cytAg/", "https://www.instagram.com/p/DPlLpG4k9JL/"]
+
+  - name: search_internet
+    description: Performs a general Google search (via Bright Data) to return summarized web results.
+    input:
+      query: string
+      examples:
+        - "latest olympics news"
+        - "how to bake bread"
+
+  - name: search_instagram
+    description: Searches Google for public Instagram posts using keywords.
+    input:
+      query: string
+      examples:
+        - "cosplay singapore"
+        - "travel photography tips"
+
+  - name: open_pages
+    description: Scrapes one or more webpages and extracts the main readable text content of each webpage.
+    input:
+      website_urls: list[string]
+      examples:
+        - ["https://example.com/blog/post1", "https://newswebsite.com/article/123"]

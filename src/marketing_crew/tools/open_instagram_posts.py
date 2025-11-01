@@ -21,6 +21,12 @@ CAPTION_CSS_STRICT = (
     "span.x193iq5w.xeuugli.x13faqbe.x1vvkbs.xt0psk2.x1i0vuye.xvs91rp.xo1l8bm."
     "x5n08af.x10wh9bi.xpm28yp.x8viiok.x1o7cslx.x126k92a"
 )
+USERNAME_CSS_STRICT = (
+    "div.html-div.xdj266r.x14z9mp.xat24cr.x1lziwak.xexx8yu.xyri2b.x18d9i69"
+    ".x1c1uobl.x9f619.xjbqb8w.x78zum5.x15mokao.x1ga7v0g.x16uus16.xbiv7yw"
+    ".x1uhb9sk.x1plvlek.xryxfnj.x1c4vz4f.x2lah0s.x1q0g3np.xqjyukv.x1qjc9v5"
+    ".x1oa3qoh.x1nhvcw1 span._ap3a._aaco._aacw._aacx._aad7._aade"
+)
 CAROUSEL_NEXT_CSS = "button[aria-label='Next']"
 CONTENT_CSS = "ul._acay"
 
@@ -83,34 +89,16 @@ def _extract_from_meta(soup: BeautifulSoup) -> Dict[str, Any]:
     photos = [img] if img else []
     return {"description": desc, "photo_urls": photos}
 
-def _extract_from_json_ld(soup: BeautifulSoup) -> Dict[str, Any]:
-    """Try application/ld+json blocks for caption/media."""
-    out = {"description": None, "photo_urls": []}
-    for tag in soup.find_all("script", {"type": "application/ld+json"}):
-        try:
-            data = json.loads(tag.string or "{}")
-        except Exception:
-            continue
-        blocks = data if isinstance(data, list) else ([data] if isinstance(data, dict) else [])
-        for b in blocks:
-            if not isinstance(b, dict):
-                continue
-            desc = b.get("description")
-            if isinstance(desc, str) and not out["description"]:
-                out["description"] = desc.strip()
-            img = b.get("image")
-            if isinstance(img, str):
-                out["photo_urls"].append(img)
-            elif isinstance(img, list):
-                out["photo_urls"].extend([i for i in img if isinstance(i, str)])
-    out["photo_urls"] = list(dict.fromkeys([u for u in out["photo_urls"] if _looks_like_photo(u)]))
-    return out
-
 def _extract_from_dom(soup: BeautifulSoup) -> Dict[str, Any]:
-    text = None
-    node = soup.select_one(CAPTION_CSS_STRICT)
-    if node:
-        text = node.get_text("\n", strip=True)
+    description = None
+    caption_node = soup.select_one(CAPTION_CSS_STRICT)
+    if caption_node:
+        description = caption_node.get_text("\n", strip=True)
+
+    username = None
+    username_node = soup.select_one(USERNAME_CSS_STRICT)
+    if username_node:
+        username = username_node.get_text("\n", strip=True)
 
     imgs = []
     for img in soup.select("li._acaz img"):
@@ -118,7 +106,8 @@ def _extract_from_dom(soup: BeautifulSoup) -> Dict[str, Any]:
         if best:
             imgs.append(best)
     imgs = list(dict.fromkeys([u for u in imgs if _looks_like_photo(u)]))
-    return {"description": text, "photo_urls": imgs}
+
+    return {"username": username, "description": description, "photo_urls": imgs}
 
 def _playwright_fetch(url: str, timeout_ms: int = PLAYWRIGHT_TIMEOUT_MS, headless: bool = HEADLESS) -> Optional[tuple[str, List[str]]]:
     browser = context = page = None
@@ -229,7 +218,7 @@ def _get_html(url: str) -> Optional[tuple[str, List[str]]]:
     return None
 
 def _scrape_one(url: str, sleep_seconds: float = DEFAULT_SLEEP_SECONDS) -> Dict[str, Any]:
-    out = {"input_url": url, "description": None, "photo_urls": [], "error": None}
+    out = {"post_url": url, "username": None, "description": None, "photo_urls": [], "error": None}
     try:
         canon = _canonical_ig_url(url)
         pack = _get_html(canon)
@@ -249,6 +238,7 @@ def _scrape_one(url: str, sleep_seconds: float = DEFAULT_SLEEP_SECONDS) -> Dict[
         # 2) Use Hydrated DOM to get caption and fallback images
         dom = _extract_from_dom(soup)
         caption = dom.get("description")
+        username = dom.get("username")
         if len(images) == 0:
             for u in dom.get("photo_urls", []):
                 if u not in images and _looks_like_photo(u):
@@ -263,6 +253,7 @@ def _scrape_one(url: str, sleep_seconds: float = DEFAULT_SLEEP_SECONDS) -> Dict[
                 images.append(u)
 
         out["description"] = caption
+        out["username"] = username
         out["photo_urls"] = images
         if not caption and not images:
             out["error"] = "no_data_found"
@@ -285,10 +276,13 @@ def _coerce_urls(maybe_urls: Union[str, List[str]]) -> List[str]:
     return list(dict.fromkeys(items))
 
 # -------------------- CrewAI tool entrypoint --------------------
-@tool("open instagram post page")
-def open_instagram_post_page(website_urls: Union[str, List[str]]) -> List[Dict[str, Any]]:
+@tool("open instagram posts")
+def open_instagram_posts(urls: Union[str, List[str]]) -> List[Dict[str, Any]]:
     """
-    Opens and extracts caption and image URLs from one or more Instagram post pages.
+    Opens and extracts poster's username, caption and image URLs from one or more Instagram post pages.
+    
+    The AI Agent can use this tool to scrape public Instagram post pages to retrieve
+    the poster's username, main caption text and all associated image URLs.
 
     Args:
         website_urls: Either
@@ -298,16 +292,18 @@ def open_instagram_post_page(website_urls: Union[str, List[str]]) -> List[Dict[s
     Returns:
         List[Dict]: One dict per input URL:
         {
-            "input_url": str,
+            "post_url": str,
+            "username": Optional[str],
             "description": Optional[str],
             "photo_urls": List[str],
             "error": Optional[str]
         }
     """
-    urls = _coerce_urls(website_urls)
+    urls = _coerce_urls(urls)
     if not urls:
         return [{
-            "input_url": website_urls if isinstance(website_urls, str) else None,
+            "post_url": urls if isinstance(urls, str) else None,
+            "username": None,
             "description": None,
             "photo_urls": [],
             "error": "invalid_input",

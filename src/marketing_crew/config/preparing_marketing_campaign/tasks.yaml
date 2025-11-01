@@ -1,0 +1,110 @@
+marketing_research:
+  description: >
+    <important_rules>
+      1. You must not make up any information. Only include information that you are confident about.
+      2. You must not include any information that is not related to the topic or the brand.
+      3. You must not include any information that is not supported by the data you have collected.
+      4. You must not include any information that is not supported by the tools you have used.
+      5. You must not include any information that is not supported by the data you have collected.
+      6. You must not include any information that is not supported by the tools you have used.
+      7. You must not include any information that is not supported by the data you have collected.
+      8. You must not include any information that is not supported by the tools you have used.
+    </important_rules>
+
+    <context>
+      1. You are to identify topics that are related to the theme of the marketing campaign.
+        <theme>{theme}</theme>
+      2. The brand you are preparing the market research for is described as <BRAND_DESCRIPTION>{brand_description}</BRAND_DESCRIPTION>.
+      3. The target audience is described as <TARGET_AUDIENCE_DESCRIPTION>{target_audience_description}</TARGET_AUDIENCE_DESCRIPTION>.
+      4. You are preparing market research to be used to guide the content strategy for the marketing campaign which will take place from {start_date} to {end_date}.
+    </context>
+
+    <tools>
+      - name: open_instagram_post_page
+        description: Opens and extracts poster's username, caption and image URLs from one or more Instagram post pages.
+        input:
+          urls: string | list[string]
+          examples:
+            - "https://www.instagram.com/p/ABC123xyz/"
+            - ["https://www.instagram.com/p/ABC123xyz/", "https://www.instagram.com/p/DEF456uvw/"]
+
+      - name: search_internet
+        description: Performs a general Google search (via Bright Data) to return summarized web results.
+        input:
+          query: string
+          examples:
+            - "latest olympics news"
+            - "how to bake bread"
+
+      - name: search_instagram
+        description: Searches Google for public Instagram posts using keywords.
+        input:
+          query: string
+          examples:
+            - "cosplay singapore"
+            - "travel photography tips"
+
+      - name: open_pages
+        description: Scrapes one or more webpages and extracts the main readable text content of each webpage.
+        input:
+          website_urls: list[string]
+          examples:
+            - ["https://example.com/blog/post1", "https://newswebsite.com/article/123"]
+    </tools>
+
+    <tool_usage_rules>
+      1. You MUST use the Search Internet tool at least once.
+      2. You MUST extract webpage content using the Open Pages tool after Search Internet.
+      3. You MUST use the Search Instagram tool at least once.
+      4. You MUST extract instagram post data using the Open Instagram Post Page tool after Search Instagram.
+      5. You MUST reference the exact tool outputs in your analysis.
+      6. You MUST NOT rely solely on internal knowledge.
+    </tool_usage_rules>
+
+    <your_task>
+      Based on the context, you are to prepare a report summarizing the competitive landscape, emerging trends tied to "{theme}", and successful examples/reference:
+        1. Learn about topics or concepts related to the campaign theme using the Search Internet tool to help you.
+        2. Identify 1-3 relevant competitors in the space using the Search Internet tool to help you.
+        3. For any relevant topics related to the campaign theme, use the Search Instagram tool to gather data on recent posts related to the campaign theme
+        4. Analyze the data collected to identify patterns in content types, engagement tactics, visual styles, and posting frequencies that align with the brand and appeal to the target audience.
+        5. You MUST generate a comprehensive and structured report summarizing your findings, including actionable insights, recommendations and references for the upcoming campaign.
+    </your_task>
+
+    <additional_instructions>
+      - When referencing instagram posts, include poster's username and post's url in the output.
+    </additional_instructions>
+  
+  expected_output: >
+    A report that includes the following sections:
+    - Executive summary
+    - Competitive landscape
+    - Emerging trends
+    - Successful examples/references
+    - Recommendations
+    - References
+    Formatted as markdown without '```'.
+
+content_strategy:
+  description: >
+    Develop an overarching content strategy for the campaign themed around "{theme}", grounded in findings from marketing_research,
+    aligned with "{brand_description}", and tailored to "{target_audience_description}". Follow the following steps:
+    1. Determine the tone and voice that will resonate with the target audience while reflecting the brand's identity.
+    2. For each phase (day, week, month) of the marketing campaign define objectives (awareness, engagement, CTA where applicable), 
+    key messages and content types (posts, stories, reels, articles).
+  expected_output: >
+    A structured content plan containing:
+    - Executive summary of the content strategy
+    - A weekly calendar overview with theme/concept, objective, and suggested posting cadence
+    Formatted as markdown without '```'.
+
+social_media_schedule:
+  description: >
+    Create a comprehensive posting schedule (Markdown table) for the period {start_date} to {end_date}, covering Instagram,
+    Facebook, Telegram, and the blog. Link each row to Copy IDs and Visual Brief IDs from the copywriting and visual_guidelines_and_briefs tasks.
+    Ensure cadence aligns with the content_strategy and phases (teaser, launch, engagement, follow-up).
+  expected_output: >
+    A schedule table with columns:
+    Week | Platform | Concept For The Week | Objective | Notes
+    Include a weekly roll-up summary (goals, key posts, risk/contingency notes) for each week in the range.
+    Formatted as markdown without '```'.
+

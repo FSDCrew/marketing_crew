@@ -50,6 +50,21 @@ marketing_research:
           website_urls: list[string]
           examples:
             - ["https://example.com/blog/post1", "https://newswebsite.com/article/123"]
+
+      - name: markdown_to_word_doc
+        description: Convert Markdown to a Word (.docx) file with GitHub-flavored Markdown features preserved. Automatically removes common leading indentation so pasted/triple-quoted Markdown isn’t treated as a code block.
+        input:
+          markdown: string
+          output_path: string
+        examples:
+          - markdown: "# Title\n\n- [x] done\n- [ ] todo\n"
+            output_path: "./output/report.docx"
+          - markdown: |
+              # Report
+              | A | B |
+              | - | - |
+              | 1 | 2 |
+            output_path: "./output/tables.docx"
     </tools>
 
     <tool_usage_rules>
@@ -63,17 +78,19 @@ marketing_research:
 
     <your_task>
       Based on the context, you are to prepare a report summarizing the competitive landscape, emerging trends tied to "{theme}", and successful examples/reference:
-        1. Learn about topics or concepts related to the campaign theme using the Search Internet tool to help you.
-        2. Identify 1-3 relevant competitors in the space using the Search Internet tool to help you.
-        3. For any relevant topics related to the campaign theme, use the Search Instagram tool to gather data on recent posts related to the campaign theme
-        4. Analyze the data collected to identify patterns in content types, engagement tactics, visual styles, and posting frequencies that align with the brand and appeal to the target audience.
-        5. You MUST generate a comprehensive and structured report summarizing your findings, including actionable insights, recommendations and references for the upcoming campaign.
+        1. Your report should be formatted as markdown without '```'.
+        2. Learn about topics or concepts related to the campaign theme using the Search Internet tool to help you.
+        3. Identify 1-3 relevant competitors in the space using the Search Internet tool to help you.
+        4. For any relevant topics related to the campaign theme, use the Search Instagram tool to gather data on recent posts related to the campaign theme
+        5. Analyze the data collected to identify patterns in content types, engagement tactics, visual styles, and posting frequencies that align with the brand and appeal to the target audience.
+        6. You MUST generate a comprehensive and structured report summarizing your findings, including actionable insights, recommendations and references for the upcoming campaign.
+        7. You MUST use the Markdown to Word Doc tool to convert the report into a Word (.docx) file. Don't include output_path in the input.
     </your_task>
 
     <additional_instructions>
       - When referencing instagram posts, include poster's username and post's url in the output.
     </additional_instructions>
-  
+
   expected_output: >
     A report that includes the following sections:
     - Executive summary
@@ -86,25 +103,293 @@ marketing_research:
 
 content_strategy:
   description: >
-    Develop an overarching content strategy for the campaign themed around "{theme}", grounded in findings from marketing_research,
-    aligned with "{brand_description}", and tailored to "{target_audience_description}". Follow the following steps:
-    1. Determine the tone and voice that will resonate with the target audience while reflecting the brand's identity.
-    2. For each phase (day, week, month) of the marketing campaign define objectives (awareness, engagement, CTA where applicable), 
-    key messages and content types (posts, stories, reels, articles).
+    <important_rules>
+      1. You must not make up any information. Only include information that you are confident about.
+      2. You must not include any information that is not related to the topic or the brand.
+    </important_rules>
+
+    <context>
+      1. You are to develop a content strategy for a marketing campaign to be executed on instagram from {start_date} to {end_date}.
+      2. The brand you are developing the content strategy for is described as <BRAND_DESCRIPTION>{brand_description}</BRAND_DESCRIPTION>.
+      3. The target audience is described as <TARGET_AUDIENCE_DESCRIPTION>{target_audience_description}</TARGET_AUDIENCE_DESCRIPTION>.
+      4. You are developing the content strategy to be used to guide the social media schedule for the marketing campaign.
+    </context>
+
+    <your_task>
+      Based on the context, you are to come up with a high-level content strategy for the marketing campaign that MUST be grounded in the marketing research
+        1. Determine an appropriate phase for the strategy. If the campaign is long you can plan per month or per week, if the campaign is relatively short the phase can
+        be day. The marketing campaign should start on the 1st day of the month or 1st Monday, whichever is closer to {start_date}.
+        2. Determine the tone and voice that will resonate with the target audience while reflecting the brand's identity.
+        3. For each phase of the marketing campaign define:
+          - objectives (awareness, engagement, CTA where applicable)
+          - key messages
+          - content types (posts, stories, reels)
+    </your_task>
+
   expected_output: >
     A structured content plan containing:
     - Executive summary of the content strategy
-    - A weekly calendar overview with theme/concept, objective, and suggested posting cadence
+    - A calendar overview with theme/concept, objective, and suggested posting cadence
     Formatted as markdown without '```'.
 
 social_media_schedule:
   description: >
-    Create a comprehensive posting schedule (Markdown table) for the period {start_date} to {end_date}, covering Instagram,
-    Facebook, Telegram, and the blog. Link each row to Copy IDs and Visual Brief IDs from the copywriting and visual_guidelines_and_briefs tasks.
-    Ensure cadence aligns with the content_strategy and phases (teaser, launch, engagement, follow-up).
-  expected_output: >
-    A schedule table with columns:
-    Week | Platform | Concept For The Week | Objective | Notes
-    Include a weekly roll-up summary (goals, key posts, risk/contingency notes) for each week in the range.
-    Formatted as markdown without '```'.
+    <important_rules>
+      1. You must not make up any information. Only include information that you are confident about.
+      2. You must not include any information that is not related to the topic or the brand.
+    </important_rules>
 
+    <context>
+      1. You are to develop a social media schedule for a marketing campaign to be executed on instagram from {start_date} to {end_date}.
+      2. The brand you are developing the content strategy for is described as <BRAND_DESCRIPTION>{brand_description}</BRAND_DESCRIPTION>.
+      3. The target audience is described as <TARGET_AUDIENCE_DESCRIPTION>{target_audience_description}</TARGET_AUDIENCE_DESCRIPTION>.
+      4. You are developing the social media schedule to be used to guide the content creation, including copy and visual design, for the marketing campaign.
+    </context>
+
+    <tools>
+      - name: html_to_excel
+        description: Converts an HTML table string into an Excel (.xlsx) file with row/col spans preserved as merged cells.
+        input:
+          html_str: string
+          output_path: string
+          examples:
+            - html_str: """
+              <table>
+                <tr><td>Hello</td><td>World</td></tr>
+                <tr><td>Hello</td><td>World</td></tr>
+              """, output_path: "./social_media_schedule.xlsx"
+    </tools>
+
+    <tools_usage_rules>
+      1. You MUST use the HTML to Excel tool to convert the HTML table string into an Excel (.xlsx) file with row/col spans preserved as merged cells.
+    </tools_usage_rules>
+
+    <sample_schedule>
+      <table border="1" cellpadding="6" cellspacing="0">
+        <thead>
+          <tr>
+            <th>Week</th>
+            <th>Posting Cadence</th>
+            <th>Post Type</th>
+            <th>Date</th>
+            <th>Theme/Concept</th>
+            <th>Objective</th>
+            <th>Description</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Week 1 (5 rows = 3 posts + 2 stories) -->
+          <tr>
+            <td rowspan="5">1</td>
+            <td rowspan="5">3 posts, 2 stories; Post times 11am, 6pm</td>
+            <td>Post</td>
+            <td>01-Nov-2025</td>
+            <td>Welcome to Semester &amp; Campus Life</td>
+            <td>Kickstart engagement; introduce semester vibe</td>
+            <td>Vibrant shots of campus, student groups &amp; iconic spots</td>
+            <td>Canva templates ready</td>
+          </tr>
+          <tr>
+            <td>Post</td>
+            <td>03-Nov-2025</td>
+            <td>Campus Life Highlights</td>
+            <td>Showcase energetic environment and increase relatability</td>
+            <td>Student life &amp; campus hotspots reel</td>
+            <td>Include trending audio</td>
+          </tr>
+          <tr>
+            <td>Post</td>
+            <td>05-Nov-2025</td>
+            <td>Clubs &amp; Student Culture</td>
+            <td>Increase awareness of extracurricular opportunities</td>
+            <td>Spotlight on student clubs &amp; culture</td>
+            <td>Highlight campus diversity</td>
+          </tr>
+          <tr>
+            <td>Story</td>
+            <td>02-Nov-2025</td>
+            <td>Welcome Season</td>
+            <td>Share excitement in real-time and drive early engagement</td>
+            <td>Orientation welcome snippets</td>
+            <td>Tag student ambassadors</td>
+          </tr>
+          <tr>
+            <td>Story</td>
+            <td>04-Nov-2025</td>
+            <td>Excitement Polls</td>
+            <td>Gather insights on what students want content about</td>
+            <td>Poll: “What are you most excited for?”</td>
+            <td>Campus GIF stickers</td>
+          </tr>
+
+          <!-- Week 2 (8 rows = 3 posts + 5 stories) -->
+          <tr>
+            <td rowspan="8">2</td>
+            <td rowspan="8">3 posts, 5 stories; Post times 12pm, 7pm</td>
+            <td>Post</td>
+            <td>07-Nov-2025</td>
+            <td>Signature Events Preview</td>
+            <td>Build excitement for upcoming campus festivals</td>
+            <td>Teasers of festival themes &amp; prep visuals</td>
+            <td>Add countdown sticker</td>
+          </tr>
+          <tr>
+            <td>Post</td>
+            <td>09-Nov-2025</td>
+            <td>Festival Hype</td>
+            <td>Boost anticipation and awareness of main highlights</td>
+            <td>Hype poster for main festival highlight</td>
+            <td>Include teaser CTA</td>
+          </tr>
+          <tr>
+            <td>Post</td>
+            <td>11-Nov-2025</td>
+            <td>Throwback Inspiration</td>
+            <td>Use nostalgia and credibility to encourage RSVPs</td>
+            <td>Trailer/snippets from past editions</td>
+            <td>Encourage RSVPs</td>
+          </tr>
+          <tr>
+            <td>Story</td>
+            <td>08-Nov-2025</td>
+            <td>Behind the Scenes</td>
+            <td>Provide insider access to drive engagement</td>
+            <td>Behind-the-scenes look</td>
+            <td>Tag organising committee</td>
+          </tr>
+          <tr>
+            <td>Story</td>
+            <td>10-Nov-2025</td>
+            <td>Event Voices</td>
+            <td>Increase participation by spotlighting student opinions</td>
+            <td>Quick vox pops on favourite past events!</td>
+            <td>Include Swipe-up link</td>
+          </tr>
+          <tr>
+            <td>Story</td>
+            <td>12-Nov-2025</td>
+            <td>Talent &amp; Vendor Showcase</td>
+            <td>Promote partners/performers to drive festival credibility</td>
+            <td>Sneak peek on vendors/performers</td>
+            <td>Short Q&amp;A quiz</td>
+          </tr>
+          <tr>
+            <td>Story</td>
+            <td>13-Nov-2025</td>
+            <td>Anticipation Polls</td>
+            <td>Capture preferences for better CG-led event content</td>
+            <td>Poll: favourite activity to attend</td>
+            <td>Encourage sharing</td>
+          </tr>
+          <tr>
+            <td>Story</td>
+            <td>14-Nov-2025</td>
+            <td>Guess the Performer</td>
+            <td>Gamify engagement with curiosity hooks</td>
+            <td>Trivia: Guess who’s performing?</td>
+            <td>Reveal tomorrow</td>
+          </tr>
+
+          <!-- Week 3 (9 rows = 3 posts + 6 stories) -->
+          <tr>
+            <td rowspan="9">3</td>
+            <td rowspan="9">3 posts, 6 stories; Post times 11am, 5pm</td>
+            <td>Post</td>
+            <td>15-Nov-2025</td>
+            <td>Student-Generated Content Showcase</td>
+            <td>Empower student voices &amp; creativity</td>
+            <td>Feature standout student works</td>
+            <td>Include submission CTA</td>
+          </tr>
+          <tr>
+            <td>Post</td>
+            <td>17-Nov-2025</td>
+            <td>Creative Spotlight</td>
+            <td>Highlight the diversity of student talent</td>
+            <td>Carousel: Student art/design highlights</td>
+            <td>Tag creators</td>
+          </tr>
+          <tr>
+            <td>Post</td>
+            <td>19-Nov-2025</td>
+            <td>Creator Deep Dive</td>
+            <td>Increase relatability through personal storytelling</td>
+            <td>Short-format documentary clip of a creator</td>
+            <td>High-share value</td>
+          </tr>
+          <tr>
+            <td>Story</td>
+            <td>16-Nov-2025</td>
+            <td>Creator Journey</td>
+            <td>Humanise creations and inspire participation</td>
+            <td>Behind-the-scenes of creators</td>
+            <td>Tag participants</td>
+          </tr>
+          <tr>
+            <td>Story</td>
+            <td>18-Nov-2025</td>
+            <td>Live Feature Voting</td>
+            <td>Boost real-time participation and feedback</td>
+            <td>Live voting prompt for features</td>
+            <td>Engagement sticker</td>
+          </tr>
+          <tr>
+            <td>Story</td>
+            <td>20-Nov-2025</td>
+            <td>Project Selection Poll</td>
+            <td>Drive decision-making engagement</td>
+            <td>Poll: which project to feature next?</td>
+            <td>Encourage reposts</td>
+          </tr>
+          <tr>
+            <td>Story</td>
+            <td>21-Nov-2025</td>
+            <td>Student Showcase Highlights</td>
+            <td>Sustain momentum around creative submissions</td>
+            <td>Slideshow of student entries</td>
+            <td>Include CTA to vote/share</td>
+          </tr>
+          <tr>
+            <td>Story</td>
+            <td>22-Nov-2025</td>
+            <td>Creator Introductions</td>
+            <td>Help audience connect with featured students</td>
+            <td>“Meet the creator” mini interviews</td>
+            <td>Add handle mentions</td>
+          </tr>
+          <tr>
+            <td>Story</td>
+            <td>23-Nov-2025</td>
+            <td>Showcase Countdown</td>
+            <td>Build hype toward final reveal</td>
+            <td>Countdown to final showcase post</td>
+            <td>Build hype</td>
+          </tr>
+        </tbody>
+      </table>
+    </sample_schedule>
+
+    <your_task>
+      Based on the context, you are to come up with a high-level weekly social media schedule for the marketing campaign that MUST be grounded in the content strategy
+      for the duration of the campaign.
+        1. Determine the total number of weeks in the campaign.
+        2. For each week:
+          - Determine the appropriate number of posts and stories to post. You can reference the posting cadence of the content strategy.
+        3. For each post:
+          - Determine the Theme/Concept for the post. It can be the based on the content strategy but be creative to also include
+          other themes or concepts that are relevant to the campaign. For example, if this week's theme is "Countdown to the New Year", you can also include
+          themes like "New Year's Resolutions", "New Year's Eve", "New Year's Day", "Behind the scenes of the New Year's Eve party", etc.
+          - Determine the date and time to post the post/story.
+          - Determine the Objective and Key Messages for the post/story.
+          - Generate a description that WILL be used to guide copy generation and visual design/image generation. This should be very detailed and specific.
+          - Generate notes that will inform the user of any additional information that is not covered in the description. For example, Tag Student Ambassadors,
+          Tag participants, Add Countdown Sticker, Include Submission CTA, Use Featured Stickers, Use Holiday Themed Stickers, Use GIF Stickers, Use Swipe-up link,
+          Use CTA to vote/share, Add handle mentions, Build hype, etc.
+        4. Determine the posting cadence for the week.
+        5. Generate a summary of the social media schedule for the campaign.
+        6. You MUST use the HTML to Excel tool to convert the HTML table string into an Excel (.xlsx) file with row/col spans preserved as merged cells. Don't include output_path in the input.
+        Your table MUST follow the sample schedule format.
+    </your_task>
+  expected_output: >
+    A HTML table string that follows the sample schedule format that is converted to an Excel file using the HTML to Excel tool.

@@ -17,15 +17,18 @@ def run():
     """
     Run the crew.
     """
-    
     inputs = {
-        'current_date': datetime.now().strftime("%Y-%m-%d"),
-        'instagram_description': input('Enter the page description here: '),
-        'topic_of_the_week': input('Enter the topic of the week here: '),
+        'theme': "SMU Patron's Day 2026",
+        'brand_description': "The official Instagram account of Singapore Management University, showcasing campus culture, student life, and signature events with vibrant, youthful storytelling.",
+        'target_audience_description': "SMU students, alumni, and the general public in Singapore who enjoy immersive campus festivals, student-generated content, and unique community celebrations.",
+        'start_date': "2025-11-01",
+        'end_date': "2026-02-21"
     }
-    
+
     try:
-        MarketingCrew().crew().kickoff(inputs=inputs)
+        result = MarketingCrew().crew().kickoff(inputs=inputs)
+        print(f"\nCrew Output:\n{result.raw}")
+        print(f"\nToken Usage:\n{result.token_usage}")
     except Exception as e:
         raise Exception(f"An error occurred while running the crew: {e}")
 

@@ -29,3 +29,30 @@ tools:
       website_urls: list[string]
       examples:
         - ["https://example.com/blog/post1", "https://newswebsite.com/article/123"]
+
+  - name: html_to_excel
+    description: Converts an HTML table string into an Excel (.xlsx) file with row/col spans preserved as merged cells.
+    input:
+      html_str: string
+      output_path: string
+      examples:
+        - html_str: """
+          <table>
+            <tr><td>Hello</td><td>World</td></tr>
+            <tr><td>Hello</td><td>World</td></tr>
+          """, output_path: "./social_media_schedule.xlsx"
+
+  - name: markdown_to_word_doc
+    description: Convert Markdown to a Word (.docx) file with GitHub-flavored Markdown features preserved. Automatically removes common leading indentation so pasted/triple-quoted Markdown isn’t treated as a code block.
+    input:
+      markdown: string
+      output_path: string
+    examples:
+      - markdown: "# Title\n\n- [x] done\n- [ ] todo\n"
+        output_path: "./output/report.docx"
+      - markdown: |
+          # Report
+          | A | B |
+          | - | - |
+          | 1 | 2 |
+        output_path: "./output/tables.docx"

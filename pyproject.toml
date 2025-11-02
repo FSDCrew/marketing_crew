@@ -5,7 +5,9 @@ description = "marketing-crew using crewAI"
 authors = [{ name = "Your Name", email = "you@example.com" }]
 requires-python = ">=3.10,<3.14"
 dependencies = [
-    "crewai[tools]>=0.203.1,<1.0.0"
+    "crewai[tools]>=0.203.1,<1.0.0",
+    "pypandoc>=1.15",
+    "xlsxwriter>=3.2.9",
 ]
 
 [project.scripts]

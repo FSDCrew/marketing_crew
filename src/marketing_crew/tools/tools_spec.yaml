@@ -49,10 +49,8 @@ tools:
       output_path: string
     examples:
       - markdown: "# Title\n\n- [x] done\n- [ ] todo\n"
-        output_path: "./output/report.docx"
       - markdown: |
           # Report
           | A | B |
           | - | - |
           | 1 | 2 |
-        output_path: "./output/tables.docx"

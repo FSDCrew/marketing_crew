@@ -58,13 +58,11 @@ marketing_research:
           output_path: string
         examples:
           - markdown: "# Title\n\n- [x] done\n- [ ] todo\n"
-            output_path: "./output/report.docx"
           - markdown: |
               # Report
               | A | B |
               | - | - |
               | 1 | 2 |
-            output_path: "./output/tables.docx"
     </tools>
 
     <tool_usage_rules>
@@ -92,13 +90,18 @@ marketing_research:
     </additional_instructions>
 
   expected_output: >
-    A report that includes the following sections:
+    Generate a report that includes the following sections:
     - Executive summary
     - Competitive landscape
     - Emerging trends
     - Successful examples/references
     - Recommendations
     - References
+
+    Write the full report in markdown.
+    Do NOT describe whether the report meets requirements.
+    Do NOT evaluate or summarize the structure.
+    Only output the report itself.
     Formatted as markdown without '```'.
 
 content_strategy:
@@ -107,6 +110,10 @@ content_strategy:
       1. You must not make up any information. Only include information that you are confident about.
       2. You must not include any information that is not related to the topic or the brand.
     </important_rules>
+
+    <marketing_research>
+      {marketing_research}
+    </marketing_research>
 
     <context>
       1. You are to develop a content strategy for a marketing campaign to be executed on instagram from {start_date} to {end_date}.
@@ -138,6 +145,14 @@ social_media_schedule:
       1. You must not make up any information. Only include information that you are confident about.
       2. You must not include any information that is not related to the topic or the brand.
     </important_rules>
+
+    <marketing_research>
+      {marketing_research}
+    </marketing_research>
+
+    <content_strategy>
+      {content_strategy}
+    </content_strategy>
 
     <context>
       1. You are to develop a social media schedule for a marketing campaign to be executed on instagram from {start_date} to {end_date}.

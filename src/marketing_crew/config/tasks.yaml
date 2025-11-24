@@ -36,8 +36,28 @@ state:
 
 tasks:
   marketing_research:
+    reads:
+      - field: theme
+        type: string
+        cardinality: required
+      - field: brand_description
+        type: string
+        cardinality: required
+      - field: target_audience_description
+        type: string
+        cardinality: required
+      - field: start_date
+        type: date
+        cardinality: required
+      - field: end_date
+        type: date
+        cardinality: required
+    writes:
+      - field: marketing_research
+        mode: replace
     key: marketing_research
     agent: market_researcher
+    output_file: output/preparing_marketing_campaign/market_research.md
     name: Marketing Research Task
     description: >
       <important_rules>
@@ -145,8 +165,31 @@ tasks:
       Formatted as markdown without '```'.
 
   content_strategy:
+    reads:
+      - field: theme
+        type: string
+        cardinality: required
+      - field: brand_description
+        type: string
+        cardinality: required
+      - field: target_audience_description
+        type: string
+        cardinality: required
+      - field: start_date
+        type: date
+        cardinality: required
+      - field: end_date
+        type: date
+        cardinality: required
+      - field: marketing_research
+        type: MarketingResearch
+        cardinality: required
+    writes:
+      - field: content_strategy
+        mode: replace
     key: content_strategy
     agent: content_strategist
+    output_file: output/preparing_marketing_campaign/content_strategy.md
     name: Content Strategy Task
     crew_inputs: theme, BRAND_DESCRIPTION, sample
     description: >
@@ -184,8 +227,34 @@ tasks:
       Formatted as markdown without '```'.
 
   social_media_schedule:
+    reads:
+      - field: theme
+        type: string
+        cardinality: required
+      - field: brand_description
+        type: string
+        cardinality: required
+      - field: target_audience_description
+        type: string
+        cardinality: required
+      - field: start_date
+        type: date
+        cardinality: required
+      - field: end_date
+        type: date
+        cardinality: required
+      - field: marketing_research
+        type: MarketingResearch
+        cardinality: required
+      - field: content_strategy
+        type: ContentStrategy
+        cardinality: required
+    writes:
+      - field: social_media_schedule
+        mode: replace
     key: social_media_schedule
     agent: scheduler
+    output_file: output/preparing_marketing_campaign/social_media_schedule.md
     name: Social Media Schedule Task
     description: >
       <important_rules>
@@ -551,7 +620,7 @@ tasks:
             - A list of discovered competitors/benchmark brands with basic notes
             - A clear indication that this dataset’s source_type is "web".
       </your_task>
-    
+
     expected_output: >
       A DiscoveryDataset object appended to the discovery_datasets list in state that:
         - Is explicitly marked as web-based discovery (e.g., source_type = "web").
@@ -680,7 +749,7 @@ tasks:
         - When referencing Instagram posts, always include the poster's username and the post's URL in the stored data so that
           they can be surfaced later as references.
       </additional_instructions>
-    
+
     expected_output: >
       A DiscoveryDataset object appended to the discovery_datasets list in state that:
         - Is explicitly marked as Instagram-based discovery (e.g., source_type = "instagram").

@@ -1,0 +1,79 @@
+marketing_research:
+  description: >
+    Conduct a comprehensive study on content related to "{topic}" for the brand described as "{brand_description}",
+    targeting "{target_audience_description}". Focus your analysis on activity within the date range {start_date} to {end_date}
+    across Instagram, Facebook, Telegram, and relevant blogs/forums. Identify competitors, current trends, top-performing content
+    types (e.g., eco-tips, product showcases, educational posts, carousels, reels), and surface insights on tone, visuals, post
+    structure, posting cadence, and hashtags that resonate with the target audience.
+    Provide links to examples, references, and benchmark campaigns that can guide the upcoming campaign direction.
+  expected_output: >
+    A markdown report summarizing the competitive landscape, emerging trends tied to "{topic}", and successful examples.
+    Include at least:
+    - A comparison table (competitor, platform, campaign focus, content format, engagement tactics, notable hashtags)
+    - A section on tone/visual patterns relevant to "{brand_description}" and "{target_audience_description}"
+    - A curated list of reference links at the end
+
+content_strategy:
+  description: >
+    Develop an overarching content strategy for the campaign themed around "{topic}", grounded in findings from marketing_research,
+    aligned with "{brand_description}", and tailored to "{target_audience_description}". Define campaign phases
+    (teaser, launch, engagement, follow-up) within {start_date} to {end_date}. Specify messaging pillars, tone, posting frequency,
+    platform roles (Instagram, Facebook, Telegram, blog), high-level content ideas, interaction mechanics (polls, Q&A, UGC),
+    and goals (awareness, engagement, conversion proxies where applicable).
+  expected_output: >
+    A structured markdown content plan containing:
+    - Platform-specific objectives and recommended content types
+    - A weekly calendar outline (Mon–Sun) covering {start_date} to {end_date} with suggested posting days
+    - Messaging pillars with example angles tied to "{topic}"
+    - A shortlist of priority hashtags and keyword themes
+    - A table mapping phases → goals → success indicators
+
+visual_guidelines_and_briefs:
+  description: >
+    Translate the content strategy into a practical visual direction guide adapted to "{brand_description}" and the preferences
+    of "{target_audience_description}". Define palette guidance (with hex codes), typography recommendations, image/illustration
+    style, composition rules, motion usage, and accessibility notes. Produce per-post visual briefs (not tool-specific) that any
+    designer or image tool can follow, including layout guidance and prompt formulas.
+  expected_output: >
+    A markdown document that includes:
+    - Brand-aligned visual guidelines (palette, typography, imagery style, composition, logo clear-space)
+    - Do/Don’t examples articulated in text
+    - Reusable prompt templates, e.g.:
+    "Create a clean, minimal carousel about {topic} for {target_audience_description}; frame 1: hook; frames 2-4: tips; frame 5: CTA; neutral background; high legibility; brand palette."
+    - A table of post briefs (ID, platform, concept, layout notes, assets needed)
+
+copywriting:
+  description: >
+    Write on-brand copy aligned to "{brand_description}" and calibrated for "{target_audience_description}" across
+    Telegram blasts, blog posts, Instagram stories, Instagram posts, and Facebook posts, all focused on "{topic}" and the campaign plan
+    within {start_date} to {end_date}. Copy should follow platform conventions, include clear CTAs, and incorporate prioritized hashtags.
+  expected_output: >
+    A markdown file with sections per channel (Telegram, Blog, IG Stories, IG Posts, Facebook).
+    For each section, provide 2–3 variants including:
+    - Hook, body, CTA
+    - Suggested hashtags (prioritized, then optional)
+    - Notes on tone and length
+    Include a small reference table mapping Copy ID → intended post/brief ID.
+
+social_media_schedule:
+  description: >
+    Create a comprehensive posting schedule (Markdown table) for the period {start_date} to {end_date}, covering Instagram,
+    Facebook, Telegram, and the blog. Link each row to Copy IDs and Visual Brief IDs from the copywriting and visual_guidelines_and_briefs tasks.
+    Ensure cadence aligns with the content_strategy and phases (teaser, launch, engagement, follow-up).
+  expected_output: >
+    A markdown schedule table with columns:
+    Date | Week | Platform | Post Title/Concept | Copy ID | Visual Brief ID | Objective | Notes | Status
+    Include a weekly roll-up summary (goals, key posts, risk/contingency notes) for each week in the range.
+
+survey_questionnaire:
+  description: >
+    Design a post-campaign feedback questionnaire (no external form integrations) to evaluate campaign effectiveness for "{topic}"
+    with "{target_audience_description}" in mind. Cover engagement, recall, perceived value, clarity of sustainability message,
+    visual appeal, and CTA effectiveness. Include a short plan for analyzing results manually (coding themes, simple metrics),
+    and how insights will loop back into future strategy updates.
+  expected_output: >
+    A markdown document including:
+    - Sections (Engagement, Awareness/Recall, Sentiment, Visual Appeal, CTA Clarity, Open-ended Feedback)
+    - Question list (multiple-choice, Likert, open-ended) ready to paste into any tool
+    - An analysis plan (how to tabulate responses, derive insights, and map back to KPIs/pillars)
+    - A brief “How to administer” checklist (timing, incentives, sample size guidance)

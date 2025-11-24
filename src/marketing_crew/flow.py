@@ -14,8 +14,8 @@ from marketing_crew.tools.open_instagram_posts import open_instagram_posts
 from marketing_crew.tools.search import open_pages, search_internet, search_instagram
 
 general_llm = LLM(
-    # model="openai/gpt-4.1-mini",
-    model="openai/gpt-4o-mini",
+    model="openai/gpt-4.1-mini",
+    # model="openai/gpt-4o-mini",
     temperature=0.7,
     seed=42
 )

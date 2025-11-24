@@ -260,13 +260,18 @@ tasks:
       <important_rules>
         1. You must not make up any information. Only include information that you are confident about.
         2. You must not include any information that is not related to the topic or the brand.
+        3. You must ensure the HTML table you generate is **structurally valid**, uses **correct rowspans**, and contains **no missing <tr> rows**.
+        4. You must ensure that every rowspan value equals the exact number of consecutive rows that belong to that week.
+        5. You must ensure the HTML contains **no unclosed tags, no mis-nested tags, and no malformed colspan/rowspan values**.
+        6. You must ensure that the table strictly follows the column order and structure of the sample schedule:
+          Week | Posting Cadence | Post Type | Date | Theme/Concept | Objective | Description | Notes
       </important_rules>
 
       <context>
-        1. You are to develop a social media schedule for a marketing campaign to be executed on instagram from {start_date} to {end_date}.
+        1. You are to develop a social media schedule for a marketing campaign to be executed on Instagram from {start_date} to {end_date}.
         2. The brand you are developing the content strategy for is described as <BRAND_DESCRIPTION>{brand_description}</BRAND_DESCRIPTION>.
         3. The target audience is described as <TARGET_AUDIENCE_DESCRIPTION>{target_audience_description}</TARGET_AUDIENCE_DESCRIPTION>.
-        4. You are developing the social media schedule to be used to guide the content creation, including copy and visual design, for the marketing campaign.
+        4. You are developing the schedule to guide content creation, including copywriting and visual design.
         5. The marketing research is as follows:
           <marketing_research>
             {marketing_research}
@@ -277,253 +282,63 @@ tasks:
           </content_strategy>
       </context>
 
+      <table_format_requirements>
+        1. The HTML table you produce MUST be fully valid and complete (no missing tags).
+        2. For each week:
+            - Start with a <tr> containing the Week number and Posting Cadence using correct rowspan.
+            - All subsequent rows for that week must NOT repeat those two columns.
+        3. Count the number of posts/stories you generate in that week, DOUBLE-CHECK this count, and set the rowspan attribute to this exact number 
+          (e.g., if there are 5 posts/stories, use rowspan="5"). Verify that the rowspan value exactly matches the number of consecutive rows for that week.
+        4. Every row must contain exactly 8 cells (except those covered by rowspan in cols 1–2):
+            <td>Post Type</td>
+            <td>Date</td>
+            <td>Theme/Concept</td>
+            <td>Objective</td>
+            <td>Description</td>
+            <td>Notes</td>
+        5. The table MUST match the structure of the sample schedule shown in <sample_schedule>.
+        6. The HTML must be compatible with the html_to_excel tool (no nested tables, no missing <tr>, no invalid spans).
+      </table_format_requirements>
+
       <tools>
         - name: html_to_excel
           description: Converts an HTML table string into an Excel (.xlsx) file with row/col spans preserved as merged cells.
           input:
             html_str: string
-            output_path: string
-            examples:
-              - html_str: """
-                <table>
-                  <tr><td>Hello</td><td>World</td></tr>
-                  <tr><td>Hello</td><td>World</td></tr>
-                """, output_path: "./social_media_schedule.xlsx"
+          examples:
+            - html_str: "<table><tr><td>Hello</td><td>World</td></tr></table>"
       </tools>
 
       <tools_usage_rules>
-        1. You MUST use the HTML to Excel tool to convert the HTML table string into an Excel (.xlsx) file with row/col spans preserved as merged cells.
+        1. You MUST use the HTML to Excel tool to convert the HTML table string into an Excel file.
+        2. Do NOT provide an output_path.
+        3. The HTML passed to the tool MUST be complete, valid, and structurally correct.
       </tools_usage_rules>
 
-      <sample_schedule>
-        <table border="1" cellpadding="6" cellspacing="0">
-          <thead>
-            <tr>
-              <th>Week</th>
-              <th>Posting Cadence</th>
-              <th>Post Type</th>
-              <th>Date</th>
-              <th>Theme/Concept</th>
-              <th>Objective</th>
-              <th>Description</th>
-              <th>Notes</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Week 1 (5 rows = 3 posts + 2 stories) -->
-            <tr>
-              <td rowspan="5">1</td>
-              <td rowspan="5">3 posts, 2 stories; Post times 11am, 6pm</td>
-              <td>Post</td>
-              <td>01-Nov-2025</td>
-              <td>Welcome to Semester &amp; Campus Life</td>
-              <td>Kickstart engagement; introduce semester vibe</td>
-              <td>Vibrant shots of campus, student groups &amp; iconic spots</td>
-              <td>Canva templates ready</td>
-            </tr>
-            <tr>
-              <td>Post</td>
-              <td>03-Nov-2025</td>
-              <td>Campus Life Highlights</td>
-              <td>Showcase energetic environment and increase relatability</td>
-              <td>Student life &amp; campus hotspots reel</td>
-              <td>Include trending audio</td>
-            </tr>
-            <tr>
-              <td>Post</td>
-              <td>05-Nov-2025</td>
-              <td>Clubs &amp; Student Culture</td>
-              <td>Increase awareness of extracurricular opportunities</td>
-              <td>Spotlight on student clubs &amp; culture</td>
-              <td>Highlight campus diversity</td>
-            </tr>
-            <tr>
-              <td>Story</td>
-              <td>02-Nov-2025</td>
-              <td>Welcome Season</td>
-              <td>Share excitement in real-time and drive early engagement</td>
-              <td>Orientation welcome snippets</td>
-              <td>Tag student ambassadors</td>
-            </tr>
-            <tr>
-              <td>Story</td>
-              <td>04-Nov-2025</td>
-              <td>Excitement Polls</td>
-              <td>Gather insights on what students want content about</td>
-              <td>Poll: “What are you most excited for?”</td>
-              <td>Campus GIF stickers</td>
-            </tr>
-
-            <!-- Week 2 (8 rows = 3 posts + 5 stories) -->
-            <tr>
-              <td rowspan="8">2</td>
-              <td rowspan="8">3 posts, 5 stories; Post times 12pm, 7pm</td>
-              <td>Post</td>
-              <td>07-Nov-2025</td>
-              <td>Signature Events Preview</td>
-              <td>Build excitement for upcoming campus festivals</td>
-              <td>Teasers of festival themes &amp; prep visuals</td>
-              <td>Add countdown sticker</td>
-            </tr>
-            <tr>
-              <td>Post</td>
-              <td>09-Nov-2025</td>
-              <td>Festival Hype</td>
-              <td>Boost anticipation and awareness of main highlights</td>
-              <td>Hype poster for main festival highlight</td>
-              <td>Include teaser CTA</td>
-            </tr>
-            <tr>
-              <td>Post</td>
-              <td>11-Nov-2025</td>
-              <td>Throwback Inspiration</td>
-              <td>Use nostalgia and credibility to encourage RSVPs</td>
-              <td>Trailer/snippets from past editions</td>
-              <td>Encourage RSVPs</td>
-            </tr>
-            <tr>
-              <td>Story</td>
-              <td>08-Nov-2025</td>
-              <td>Behind the Scenes</td>
-              <td>Provide insider access to drive engagement</td>
-              <td>Behind-the-scenes look</td>
-              <td>Tag organising committee</td>
-            </tr>
-            <tr>
-              <td>Story</td>
-              <td>10-Nov-2025</td>
-              <td>Event Voices</td>
-              <td>Increase participation by spotlighting student opinions</td>
-              <td>Quick vox pops on favourite past events!</td>
-              <td>Include Swipe-up link</td>
-            </tr>
-            <tr>
-              <td>Story</td>
-              <td>12-Nov-2025</td>
-              <td>Talent &amp; Vendor Showcase</td>
-              <td>Promote partners/performers to drive festival credibility</td>
-              <td>Sneak peek on vendors/performers</td>
-              <td>Short Q&amp;A quiz</td>
-            </tr>
-            <tr>
-              <td>Story</td>
-              <td>13-Nov-2025</td>
-              <td>Anticipation Polls</td>
-              <td>Capture preferences for better CG-led event content</td>
-              <td>Poll: favourite activity to attend</td>
-              <td>Encourage sharing</td>
-            </tr>
-            <tr>
-              <td>Story</td>
-              <td>14-Nov-2025</td>
-              <td>Guess the Performer</td>
-              <td>Gamify engagement with curiosity hooks</td>
-              <td>Trivia: Guess who’s performing?</td>
-              <td>Reveal tomorrow</td>
-            </tr>
-
-            <!-- Week 3 (9 rows = 3 posts + 6 stories) -->
-            <tr>
-              <td rowspan="9">3</td>
-              <td rowspan="9">3 posts, 6 stories; Post times 11am, 5pm</td>
-              <td>Post</td>
-              <td>15-Nov-2025</td>
-              <td>Student-Generated Content Showcase</td>
-              <td>Empower student voices &amp; creativity</td>
-              <td>Feature standout student works</td>
-              <td>Include submission CTA</td>
-            </tr>
-            <tr>
-              <td>Post</td>
-              <td>17-Nov-2025</td>
-              <td>Creative Spotlight</td>
-              <td>Highlight the diversity of student talent</td>
-              <td>Carousel: Student art/design highlights</td>
-              <td>Tag creators</td>
-            </tr>
-            <tr>
-              <td>Post</td>
-              <td>19-Nov-2025</td>
-              <td>Creator Deep Dive</td>
-              <td>Increase relatability through personal storytelling</td>
-              <td>Short-format documentary clip of a creator</td>
-              <td>High-share value</td>
-            </tr>
-            <tr>
-              <td>Story</td>
-              <td>16-Nov-2025</td>
-              <td>Creator Journey</td>
-              <td>Humanise creations and inspire participation</td>
-              <td>Behind-the-scenes of creators</td>
-              <td>Tag participants</td>
-            </tr>
-            <tr>
-              <td>Story</td>
-              <td>18-Nov-2025</td>
-              <td>Live Feature Voting</td>
-              <td>Boost real-time participation and feedback</td>
-              <td>Live voting prompt for features</td>
-              <td>Engagement sticker</td>
-            </tr>
-            <tr>
-              <td>Story</td>
-              <td>20-Nov-2025</td>
-              <td>Project Selection Poll</td>
-              <td>Drive decision-making engagement</td>
-              <td>Poll: which project to feature next?</td>
-              <td>Encourage reposts</td>
-            </tr>
-            <tr>
-              <td>Story</td>
-              <td>21-Nov-2025</td>
-              <td>Student Showcase Highlights</td>
-              <td>Sustain momentum around creative submissions</td>
-              <td>Slideshow of student entries</td>
-              <td>Include CTA to vote/share</td>
-            </tr>
-            <tr>
-              <td>Story</td>
-              <td>22-Nov-2025</td>
-              <td>Creator Introductions</td>
-              <td>Help audience connect with featured students</td>
-              <td>“Meet the creator” mini interviews</td>
-              <td>Add handle mentions</td>
-            </tr>
-            <tr>
-              <td>Story</td>
-              <td>23-Nov-2025</td>
-              <td>Showcase Countdown</td>
-              <td>Build hype toward final reveal</td>
-              <td>Countdown to final showcase post</td>
-              <td>Build hype</td>
-            </tr>
-          </tbody>
-        </table>
-      </sample_schedule>
-
       <your_task>
-        Based on the context, you are to come up with a high-level weekly social media schedule for the marketing campaign that MUST be grounded in the content strategy
-        for the duration of the campaign.
+        You must generate a complete weekly social media posting schedule covering the entire period from {start_date} to {end_date}.
+
+        Required steps:
           1. Determine the total number of weeks in the campaign.
-          2. For each week:
-            - Determine the appropriate number of posts and stories to post. You can reference the posting cadence of the content strategy.
-          3. For each post:
-            - Determine the Theme/Concept for the post. It can be the based on the content strategy but be creative to also include
-            other themes or concepts that are relevant to the campaign. For example, if this week's theme is "Countdown to the New Year", you can also include
-            themes like "New Year's Resolutions", "New Year's Eve", "New Year's Day", "Behind the scenes of the New Year's Eve party", etc.
-            - Determine the date and time to post the post/story.
-            - Determine the Objective and Key Messages for the post/story.
-            - Generate a description that WILL be used to guide copy generation and visual design/image generation. This should be very detailed and specific.
-            - Generate notes that will inform the user of any additional information that is not covered in the description. For example, Tag Student Ambassadors,
-            Tag participants, Add Countdown Sticker, Include Submission CTA, Use Featured Stickers, Use Holiday Themed Stickers, Use GIF Stickers, Use Swipe-up link,
-            Use CTA to vote/share, Add handle mentions, Build hype, etc.
-          4. Determine the posting cadence for the week.
-          5. Generate a summary of the social media schedule for the campaign.
-          6. You MUST use the HTML to Excel tool to convert the HTML table string into an Excel (.xlsx) file with row/col spans preserved as merged cells. Don't include output_path in the input.
-          Your table MUST follow the sample schedule format.
+          2. For each week, determine the number of posts and stories based on the content strategy.
+          3. For every post/story:
+              - Determine Theme/Concept grounded in the content strategy.
+              - Determine exact date.
+              - Generate Objective, Key Messages, and a detailed Description (used for copy and visual design).
+              - Generate Notes (tags, CTA, stickers, etc.).
+          4. Identify the weekly posting cadence and place it in the second column.
+          5. Construct the final HTML table following the sample schedule format EXACTLY.
+          6. Validate:
+              - All <tr> rows exist.
+              - All <td> columns are present in every row.
+              - All rowspan values are exactly equal to the number of rows they span.
+              - No malformed HTML is produced.
+          7. Pass the final HTML table string into the html_to_excel tool.
       </your_task>
-    expected_output: >
-      A HTML table string that follows the sample schedule format that is converted to an Excel file using the HTML to Excel tool.
+
+      expected_output: >
+        A properly structured HTML table string that strictly follows the sample schedule format,
+        converted into an Excel file using the html_to_excel tool.
 
   web_discovery:
     reads:

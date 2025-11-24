@@ -1,410 +1,855 @@
-marketing_research:
-  description: >
-    <important_rules>
-      1. You must not make up any information. Only include information that you are confident about.
-      2. You must not include any information that is not related to the topic or the brand.
-      3. You must not include any information that is not supported by the data you have collected.
-      4. You must not include any information that is not supported by the tools you have used.
-      5. You must not include any information that is not supported by the data you have collected.
-      6. You must not include any information that is not supported by the tools you have used.
-      7. You must not include any information that is not supported by the data you have collected.
-      8. You must not include any information that is not supported by the tools you have used.
-    </important_rules>
+state:
+  fields:
+    # --- Campaign Context Fields (always user-provided) ---
+    theme:
+      type: string
+      field_kind: context
+    brand_description:
+      type: string
+      field_kind: context
+    target_audience_description:
+      type: string
+      field_kind: context
+    start_date:
+      type: date
+      field_kind: context
+    end_date:
+      type: date
+      field_kind: context
 
-    <context>
-      1. You are to identify topics that are related to the theme of the marketing campaign.
-        <theme>{theme}</theme>
-      2. The brand you are preparing the market research for is described as <BRAND_DESCRIPTION>{brand_description}</BRAND_DESCRIPTION>.
-      3. The target audience is described as <TARGET_AUDIENCE_DESCRIPTION>{target_audience_description}</TARGET_AUDIENCE_DESCRIPTION>.
-      4. You are preparing market research to be used to guide the content strategy for the marketing campaign which will take place from {start_date} to {end_date}.
-    </context>
+    # --- Dynamic Data Fields (produced or provided depending on workflow) ---
+    discovery_datasets:
+      type: list[DiscoveryDataset]
+      field_kind: data
 
-    <tools>
-      - name: open_instagram_post_page
-        description: Opens and extracts poster's username, caption and image URLs from one or more Instagram post pages.
-        input:
-          urls: string | list[string]
+    marketing_research:
+      type: MarketingResearch
+      field_kind: data
+
+    content_strategy:
+      type: ContentStrategy
+      field_kind: data
+
+    social_media_schedule:
+      type: SocialMediaSchedule
+      field_kind: data
+
+tasks:
+  marketing_research:
+    key: marketing_research
+    agent: market_researcher
+    name: Marketing Research Task
+    description: >
+      <important_rules>
+        1. You must not make up any information. Only include information that you are confident about.
+        2. You must not include any information that is not related to the topic or the brand.
+        3. You must not include any information that is not supported by the data you have collected.
+        4. You must not include any information that is not supported by the tools you have used.
+        5. You must not include any information that is not supported by the data you have collected.
+        6. You must not include any information that is not supported by the tools you have used.
+        7. You must not include any information that is not supported by the data you have collected.
+        8. You must not include any information that is not supported by the tools you have used.
+      </important_rules>
+
+      <context>
+        1. You are to identify topics that are related to the theme of the marketing campaign.
+          <theme>{theme}</theme>
+        2. The brand you are preparing the market research for is described as <BRAND_DESCRIPTION>{brand_description}</BRAND_DESCRIPTION>.
+        3. The target audience is described as <TARGET_AUDIENCE_DESCRIPTION>{target_audience_description}</TARGET_AUDIENCE_DESCRIPTION>.
+        4. You are preparing market research to be used to guide the content strategy for the marketing campaign which will take place from {start_date} to {end_date}.
+      </context>
+
+      <tools>
+        - name: open_instagram_post_page
+          description: Opens and extracts poster's username, caption and image URLs from one or more Instagram post pages.
+          input:
+            urls: string | list[string]
+            examples:
+              - "https://www.instagram.com/p/ABC123xyz/"
+              - ["https://www.instagram.com/p/ABC123xyz/", "https://www.instagram.com/p/DEF456uvw/"]
+
+        - name: search_internet
+          description: Performs a general Google search (via Bright Data) to return summarized web results.
+          input:
+            query: string
+            examples:
+              - "latest olympics news"
+              - "how to bake bread"
+
+        - name: search_instagram
+          description: Searches Google for public Instagram posts using keywords.
+          input:
+            query: string
+            examples:
+              - "cosplay singapore"
+              - "travel photography tips"
+
+        - name: open_pages
+          description: Scrapes one or more webpages and extracts the main readable text content of each webpage.
+          input:
+            website_urls: list[string]
+            examples:
+              - ["https://example.com/blog/post1", "https://newswebsite.com/article/123"]
+
+        - name: markdown_to_word_doc
+          description: Convert Markdown to a Word (.docx) file with GitHub-flavored Markdown features preserved. Automatically removes common leading indentation so pasted/triple-quoted Markdown isn’t treated as a code block.
+          input:
+            markdown: string
+            output_path: string
           examples:
-            - "https://www.instagram.com/p/ABC123xyz/"
-            - ["https://www.instagram.com/p/ABC123xyz/", "https://www.instagram.com/p/DEF456uvw/"]
+            - markdown: "# Title\n\n- [x] done\n- [ ] todo\n"
+            - markdown: |
+                # Report
+                | A | B |
+                | - | - |
+                | 1 | 2 |
+      </tools>
 
-      - name: search_internet
-        description: Performs a general Google search (via Bright Data) to return summarized web results.
-        input:
-          query: string
+      <tool_usage_rules>
+        1. You MUST use the Search Internet tool at least once.
+        2. You MUST extract webpage content using the Open Pages tool after Search Internet.
+        3. You MUST use the Search Instagram tool at least once.
+        4. You MUST extract instagram post data using the Open Instagram Post Page tool after Search Instagram.
+        5. You MUST reference the exact tool outputs in your analysis.
+        6. You MUST NOT rely solely on internal knowledge.
+      </tool_usage_rules>
+
+      <your_task>
+        Based on the context, you are to prepare a report summarizing the competitive landscape, emerging trends tied to "{theme}", and successful examples/reference:
+          1. Your report should be formatted as markdown without '```'.
+          2. Learn about topics or concepts related to the campaign theme using the Search Internet tool to help you.
+          3. Identify 1-3 relevant competitors in the space using the Search Internet tool to help you.
+          4. For any relevant topics related to the campaign theme, use the Search Instagram tool to gather data on recent posts related to the campaign theme
+          5. Analyze the data collected to identify patterns in content types, engagement tactics, visual styles, and posting frequencies that align with the brand and appeal to the target audience.
+          6. You MUST generate a comprehensive and structured report summarizing your findings, including actionable insights, recommendations and references for the upcoming campaign.
+          7. You MUST use the Markdown to Word Doc tool to convert the report into a Word (.docx) file. Don't include output_path in the input.
+      </your_task>
+
+      <additional_instructions>
+        - When referencing instagram posts, include poster's username and post's url in the output.
+      </additional_instructions>
+
+    expected_output: >
+      Generate a report that includes the following sections:
+      - Executive summary
+      - Competitive landscape
+      - Emerging trends
+      - Successful examples/references
+      - Recommendations
+      - References
+
+      Write the full report in markdown.
+      Do NOT describe whether the report meets requirements.
+      Do NOT evaluate or summarize the structure.
+      Only output the report itself.
+      Formatted as markdown without '```'.
+
+  content_strategy:
+    key: content_strategy
+    agent: content_strategist
+    name: Content Strategy Task
+    crew_inputs: theme, BRAND_DESCRIPTION, sample
+    description: >
+      <important_rules>
+        1. You must not make up any information. Only include information that you are confident about.
+        2. You must not include any information that is not related to the topic or the brand.
+      </important_rules>
+
+      <context>
+        1. You are to develop a content strategy for a marketing campaign to be executed on instagram from {start_date} to {end_date}.
+        2. The brand you are developing the content strategy for is described as <BRAND_DESCRIPTION>{brand_description}</BRAND_DESCRIPTION>.
+        3. The target audience is described as <TARGET_AUDIENCE_DESCRIPTION>{target_audience_description}</TARGET_AUDIENCE_DESCRIPTION>.
+        4. You are developing the content strategy to be used to guide the social media schedule for the marketing campaign.
+        5. The marketing research is as follows:
+          <marketing_research>
+            {marketing_research}
+          </marketing_research>
+      </context>
+
+      <your_task>
+        Based on the context, you are to come up with a high-level content strategy for the marketing campaign that MUST be grounded in the marketing research
+          1. Determine an appropriate phase for the strategy. If the campaign is long you can plan per month or per week, if the campaign is relatively short the phase can
+          be day. The marketing campaign should start on the 1st day of the month or 1st Monday, whichever is closer to {start_date}.
+          2. Determine the tone and voice that will resonate with the target audience while reflecting the brand's identity.
+          3. For each phase of the marketing campaign define:
+            - objectives (awareness, engagement, CTA where applicable)
+            - key messages
+            - content types (posts, stories, reels)
+      </your_task>
+
+    expected_output: >
+      A structured content plan containing:
+      - Executive summary of the content strategy
+      - A calendar overview with theme/concept, objective, and suggested posting cadence
+      Formatted as markdown without '```'.
+
+  social_media_schedule:
+    key: social_media_schedule
+    agent: scheduler
+    name: Social Media Schedule Task
+    description: >
+      <important_rules>
+        1. You must not make up any information. Only include information that you are confident about.
+        2. You must not include any information that is not related to the topic or the brand.
+      </important_rules>
+
+      <context>
+        1. You are to develop a social media schedule for a marketing campaign to be executed on instagram from {start_date} to {end_date}.
+        2. The brand you are developing the content strategy for is described as <BRAND_DESCRIPTION>{brand_description}</BRAND_DESCRIPTION>.
+        3. The target audience is described as <TARGET_AUDIENCE_DESCRIPTION>{target_audience_description}</TARGET_AUDIENCE_DESCRIPTION>.
+        4. You are developing the social media schedule to be used to guide the content creation, including copy and visual design, for the marketing campaign.
+        5. The marketing research is as follows:
+          <marketing_research>
+            {marketing_research}
+          </marketing_research>
+        6. The content strategy is as follows:
+          <content_strategy>
+            {content_strategy}
+          </content_strategy>
+      </context>
+
+      <tools>
+        - name: html_to_excel
+          description: Converts an HTML table string into an Excel (.xlsx) file with row/col spans preserved as merged cells.
+          input:
+            html_str: string
+            output_path: string
+            examples:
+              - html_str: """
+                <table>
+                  <tr><td>Hello</td><td>World</td></tr>
+                  <tr><td>Hello</td><td>World</td></tr>
+                """, output_path: "./social_media_schedule.xlsx"
+      </tools>
+
+      <tools_usage_rules>
+        1. You MUST use the HTML to Excel tool to convert the HTML table string into an Excel (.xlsx) file with row/col spans preserved as merged cells.
+      </tools_usage_rules>
+
+      <sample_schedule>
+        <table border="1" cellpadding="6" cellspacing="0">
+          <thead>
+            <tr>
+              <th>Week</th>
+              <th>Posting Cadence</th>
+              <th>Post Type</th>
+              <th>Date</th>
+              <th>Theme/Concept</th>
+              <th>Objective</th>
+              <th>Description</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Week 1 (5 rows = 3 posts + 2 stories) -->
+            <tr>
+              <td rowspan="5">1</td>
+              <td rowspan="5">3 posts, 2 stories; Post times 11am, 6pm</td>
+              <td>Post</td>
+              <td>01-Nov-2025</td>
+              <td>Welcome to Semester &amp; Campus Life</td>
+              <td>Kickstart engagement; introduce semester vibe</td>
+              <td>Vibrant shots of campus, student groups &amp; iconic spots</td>
+              <td>Canva templates ready</td>
+            </tr>
+            <tr>
+              <td>Post</td>
+              <td>03-Nov-2025</td>
+              <td>Campus Life Highlights</td>
+              <td>Showcase energetic environment and increase relatability</td>
+              <td>Student life &amp; campus hotspots reel</td>
+              <td>Include trending audio</td>
+            </tr>
+            <tr>
+              <td>Post</td>
+              <td>05-Nov-2025</td>
+              <td>Clubs &amp; Student Culture</td>
+              <td>Increase awareness of extracurricular opportunities</td>
+              <td>Spotlight on student clubs &amp; culture</td>
+              <td>Highlight campus diversity</td>
+            </tr>
+            <tr>
+              <td>Story</td>
+              <td>02-Nov-2025</td>
+              <td>Welcome Season</td>
+              <td>Share excitement in real-time and drive early engagement</td>
+              <td>Orientation welcome snippets</td>
+              <td>Tag student ambassadors</td>
+            </tr>
+            <tr>
+              <td>Story</td>
+              <td>04-Nov-2025</td>
+              <td>Excitement Polls</td>
+              <td>Gather insights on what students want content about</td>
+              <td>Poll: “What are you most excited for?”</td>
+              <td>Campus GIF stickers</td>
+            </tr>
+
+            <!-- Week 2 (8 rows = 3 posts + 5 stories) -->
+            <tr>
+              <td rowspan="8">2</td>
+              <td rowspan="8">3 posts, 5 stories; Post times 12pm, 7pm</td>
+              <td>Post</td>
+              <td>07-Nov-2025</td>
+              <td>Signature Events Preview</td>
+              <td>Build excitement for upcoming campus festivals</td>
+              <td>Teasers of festival themes &amp; prep visuals</td>
+              <td>Add countdown sticker</td>
+            </tr>
+            <tr>
+              <td>Post</td>
+              <td>09-Nov-2025</td>
+              <td>Festival Hype</td>
+              <td>Boost anticipation and awareness of main highlights</td>
+              <td>Hype poster for main festival highlight</td>
+              <td>Include teaser CTA</td>
+            </tr>
+            <tr>
+              <td>Post</td>
+              <td>11-Nov-2025</td>
+              <td>Throwback Inspiration</td>
+              <td>Use nostalgia and credibility to encourage RSVPs</td>
+              <td>Trailer/snippets from past editions</td>
+              <td>Encourage RSVPs</td>
+            </tr>
+            <tr>
+              <td>Story</td>
+              <td>08-Nov-2025</td>
+              <td>Behind the Scenes</td>
+              <td>Provide insider access to drive engagement</td>
+              <td>Behind-the-scenes look</td>
+              <td>Tag organising committee</td>
+            </tr>
+            <tr>
+              <td>Story</td>
+              <td>10-Nov-2025</td>
+              <td>Event Voices</td>
+              <td>Increase participation by spotlighting student opinions</td>
+              <td>Quick vox pops on favourite past events!</td>
+              <td>Include Swipe-up link</td>
+            </tr>
+            <tr>
+              <td>Story</td>
+              <td>12-Nov-2025</td>
+              <td>Talent &amp; Vendor Showcase</td>
+              <td>Promote partners/performers to drive festival credibility</td>
+              <td>Sneak peek on vendors/performers</td>
+              <td>Short Q&amp;A quiz</td>
+            </tr>
+            <tr>
+              <td>Story</td>
+              <td>13-Nov-2025</td>
+              <td>Anticipation Polls</td>
+              <td>Capture preferences for better CG-led event content</td>
+              <td>Poll: favourite activity to attend</td>
+              <td>Encourage sharing</td>
+            </tr>
+            <tr>
+              <td>Story</td>
+              <td>14-Nov-2025</td>
+              <td>Guess the Performer</td>
+              <td>Gamify engagement with curiosity hooks</td>
+              <td>Trivia: Guess who’s performing?</td>
+              <td>Reveal tomorrow</td>
+            </tr>
+
+            <!-- Week 3 (9 rows = 3 posts + 6 stories) -->
+            <tr>
+              <td rowspan="9">3</td>
+              <td rowspan="9">3 posts, 6 stories; Post times 11am, 5pm</td>
+              <td>Post</td>
+              <td>15-Nov-2025</td>
+              <td>Student-Generated Content Showcase</td>
+              <td>Empower student voices &amp; creativity</td>
+              <td>Feature standout student works</td>
+              <td>Include submission CTA</td>
+            </tr>
+            <tr>
+              <td>Post</td>
+              <td>17-Nov-2025</td>
+              <td>Creative Spotlight</td>
+              <td>Highlight the diversity of student talent</td>
+              <td>Carousel: Student art/design highlights</td>
+              <td>Tag creators</td>
+            </tr>
+            <tr>
+              <td>Post</td>
+              <td>19-Nov-2025</td>
+              <td>Creator Deep Dive</td>
+              <td>Increase relatability through personal storytelling</td>
+              <td>Short-format documentary clip of a creator</td>
+              <td>High-share value</td>
+            </tr>
+            <tr>
+              <td>Story</td>
+              <td>16-Nov-2025</td>
+              <td>Creator Journey</td>
+              <td>Humanise creations and inspire participation</td>
+              <td>Behind-the-scenes of creators</td>
+              <td>Tag participants</td>
+            </tr>
+            <tr>
+              <td>Story</td>
+              <td>18-Nov-2025</td>
+              <td>Live Feature Voting</td>
+              <td>Boost real-time participation and feedback</td>
+              <td>Live voting prompt for features</td>
+              <td>Engagement sticker</td>
+            </tr>
+            <tr>
+              <td>Story</td>
+              <td>20-Nov-2025</td>
+              <td>Project Selection Poll</td>
+              <td>Drive decision-making engagement</td>
+              <td>Poll: which project to feature next?</td>
+              <td>Encourage reposts</td>
+            </tr>
+            <tr>
+              <td>Story</td>
+              <td>21-Nov-2025</td>
+              <td>Student Showcase Highlights</td>
+              <td>Sustain momentum around creative submissions</td>
+              <td>Slideshow of student entries</td>
+              <td>Include CTA to vote/share</td>
+            </tr>
+            <tr>
+              <td>Story</td>
+              <td>22-Nov-2025</td>
+              <td>Creator Introductions</td>
+              <td>Help audience connect with featured students</td>
+              <td>“Meet the creator” mini interviews</td>
+              <td>Add handle mentions</td>
+            </tr>
+            <tr>
+              <td>Story</td>
+              <td>23-Nov-2025</td>
+              <td>Showcase Countdown</td>
+              <td>Build hype toward final reveal</td>
+              <td>Countdown to final showcase post</td>
+              <td>Build hype</td>
+            </tr>
+          </tbody>
+        </table>
+      </sample_schedule>
+
+      <your_task>
+        Based on the context, you are to come up with a high-level weekly social media schedule for the marketing campaign that MUST be grounded in the content strategy
+        for the duration of the campaign.
+          1. Determine the total number of weeks in the campaign.
+          2. For each week:
+            - Determine the appropriate number of posts and stories to post. You can reference the posting cadence of the content strategy.
+          3. For each post:
+            - Determine the Theme/Concept for the post. It can be the based on the content strategy but be creative to also include
+            other themes or concepts that are relevant to the campaign. For example, if this week's theme is "Countdown to the New Year", you can also include
+            themes like "New Year's Resolutions", "New Year's Eve", "New Year's Day", "Behind the scenes of the New Year's Eve party", etc.
+            - Determine the date and time to post the post/story.
+            - Determine the Objective and Key Messages for the post/story.
+            - Generate a description that WILL be used to guide copy generation and visual design/image generation. This should be very detailed and specific.
+            - Generate notes that will inform the user of any additional information that is not covered in the description. For example, Tag Student Ambassadors,
+            Tag participants, Add Countdown Sticker, Include Submission CTA, Use Featured Stickers, Use Holiday Themed Stickers, Use GIF Stickers, Use Swipe-up link,
+            Use CTA to vote/share, Add handle mentions, Build hype, etc.
+          4. Determine the posting cadence for the week.
+          5. Generate a summary of the social media schedule for the campaign.
+          6. You MUST use the HTML to Excel tool to convert the HTML table string into an Excel (.xlsx) file with row/col spans preserved as merged cells. Don't include output_path in the input.
+          Your table MUST follow the sample schedule format.
+      </your_task>
+    expected_output: >
+      A HTML table string that follows the sample schedule format that is converted to an Excel file using the HTML to Excel tool.
+
+  web_discovery:
+    reads:
+      - field: theme
+        type: string
+        cardinality: required
+      - field: brand_description
+        type: string
+        cardinality: required
+      - field: target_audience_description
+        type: string
+        cardinality: required
+      - field: start_date
+        type: date
+        cardinality: required
+      - field: end_date
+        type: date
+        cardinality: required
+    writes:
+      - field: discovery_datasets
+        mode: append
+    key: web_discovery
+    agent: web_discovery_agent
+    name: Web Discovery
+    description: >
+      <important_rules>
+        1. You must not make up any information. Only include information that you are confident about.
+        2. You must not include any information that is not related to the topic or the brand.
+        3. You must not include any information that is not supported by the data you have collected.
+        4. You must not include any information that is not supported by the tools you have used.
+        5. You must not include any information that is not supported by the data you have collected.
+        6. You must not include any information that is not supported by the tools you have used.
+        7. You must not include any information that is not supported by the data you have collected.
+        8. You must not include any information that is not supported by the tools you have used.
+      </important_rules>
+      <context>
+        1. You are to identify topics, trends, and relevant webpages that are related to the theme of the marketing campaign:
+          <theme>{theme}</theme>
+        2. The brand you are preparing the web discovery for is described as
+          <BRAND_DESCRIPTION>{brand_description}</BRAND_DESCRIPTION>.
+        3. The target audience is described as
+          <TARGET_AUDIENCE_DESCRIPTION>{target_audience_description}</TARGET_AUDIENCE_DESCRIPTION>.
+        4. You are preparing web-based discovery research to guide the content strategy for the marketing campaign which will
+          take place from {start_date} to {end_date}.
+      </context>
+
+      <tools>
+        - name: search_internet
+          description: Performs a general Google search (via Bright Data) to return summarized web results.
+          input:
+            query: string
           examples:
             - "latest olympics news"
             - "how to bake bread"
 
-      - name: search_instagram
-        description: Searches Google for public Instagram posts using keywords.
-        input:
-          query: string
+        - name: open_pages
+          description: Scrapes one or more webpages and extracts the main readable text content of each webpage.
+          input:
+            website_urls: list[string]
+          examples:
+            - ["https://example.com/blog/post1", "https://newswebsite.com/article/123"]
+      </tools>
+
+      <tool_usage_rules>
+        1. You MUST use the Search Internet tool at least once to discover web content related to the campaign theme, brand,
+          and target audience.
+        2. After using Search Internet, you MUST extract webpage content using the Open Pages tool for any URLs selected as
+          relevant to the campaign.
+        3. You MUST reference the exact tool outputs (summaries, URLs, and extracted page text) in your analysis and in the
+          constructed DiscoveryDataset.
+        4. You MUST NOT rely solely on internal knowledge; your findings MUST be based on the tool outputs.
+      </tool_usage_rules>
+
+      <your_task>
+        Based on the context, you are to perform web-based discovery research tied to "{theme}":
+          1. Use the Search Internet tool to:
+            - Discover topics and concepts related to the campaign theme.
+            - Identify 1–3 relevant competitors or adjacent brands active in this thematic space.
+            - Find relevant articles, blog posts, landing pages, and other key webpages.
+          2. Use the Open Pages tool to fetch readable text content from selected URLs returned by Search Internet.
+          3. For each relevant webpage, capture:
+            - URL
+            - Page title or short label
+            - Source/domain
+            - Brief summary of the content as it relates to the campaign theme and brand
+            - Extracted main text snippet(s) that are useful for later analysis
+          4. Identify and label any potential competitors or benchmark brands discovered in the process, including:
+            - Brand name
+            - URL(s)
+            - Short description of their positioning or activity connected to the theme
+          5. Package all of this into a single DiscoveryDataset object with enough structure for later synthesis, including:
+            - The theme, brand, and target audience context
+            - A list of relevant pages with metadata and extracted text
+            - A list of discovered competitors/benchmark brands with basic notes
+            - A clear indication that this dataset’s source_type is "web".
+      </your_task>
+    
+    expected_output: >
+      A DiscoveryDataset object appended to the discovery_datasets list in state that:
+        - Is explicitly marked as web-based discovery (e.g., source_type = "web").
+        - Includes campaign context:
+          - theme
+          - brand_description
+          - target_audience_description
+          - start_date and end_date
+        - Contains a collection of web sources, each with:
+          - url
+          - title or label
+          - domain/source
+          - short summary of relevance to the campaign theme
+          - extracted main_text snippet(s) from the page
+        - Lists 1–3 (or more, if found) relevant competitors or benchmark brands with:
+          - name
+          - primary url(s)
+          - short description of positioning and how they relate to the theme
+        - Is structured so that future tasks can easily consume it to generate insights, trends, and references for the campaign.
+
+  instagram_discovery:
+    reads:
+      - field: theme
+        type: string
+        cardinality: required
+      - field: brand_description
+        type: string
+        cardinality: required
+      - field: target_audience_description
+        type: string
+        cardinality: required
+      - field: start_date
+        type: date
+        cardinality: required
+      - field: end_date
+        type: date
+        cardinality: required
+    writes:
+      - field: discovery_datasets
+        mode: append
+    key: instagram_discovery
+    agent: instagram_discovery_agent
+    name: Instagram Discovery
+    description: >
+      <important_rules>
+        1. You must not make up any information. Only include information that you are confident about.
+        2. You must not include any information that is not related to the topic or the brand.
+        3. You must not include any information that is not supported by the data you have collected.
+        4. You must not include any information that is not supported by the tools you have used.
+        5. You must not include any information that is not supported by the data you have collected.
+        6. You must not include any information that is not supported by the tools you have used.
+        7. You must not include any information that is not supported by the data you have collected.
+        8. You must not include any information that is not supported by the tools you have used.
+      </important_rules>
+      <context>
+        1. You are to discover recent Instagram content related to the theme of the marketing campaign:
+          <theme>{theme}</theme>
+        2. The brand you are preparing the Instagram discovery for is described as
+          <BRAND_DESCRIPTION>{brand_description}</BRAND_DESCRIPTION>.
+        3. The target audience is described as
+          <TARGET_AUDIENCE_DESCRIPTION>{target_audience_description}</TARGET_AUDIENCE_DESCRIPTION>.
+        4. You are preparing Instagram-based discovery research to guide the content strategy for the marketing campaign which
+          will take place from {start_date} to {end_date}.
+      </context>
+
+      <tools>
+        - name: search_instagram
+          description: Searches Google for public Instagram posts using keywords.
+          input:
+            query: string
           examples:
             - "cosplay singapore"
             - "travel photography tips"
 
-      - name: open_pages
-        description: Scrapes one or more webpages and extracts the main readable text content of each webpage.
-        input:
-          website_urls: list[string]
+        - name: open_instagram_post_page
+          description: Opens and extracts poster's username, caption and image URLs from one or more Instagram post pages.
+          input:
+            urls: string | list[string]
           examples:
-            - ["https://example.com/blog/post1", "https://newswebsite.com/article/123"]
+            - "https://www.instagram.com/p/ABC123xyz/"
+            - ["https://www.instagram.com/p/ABC123xyz/", "https://www.instagram.com/p/DEF456uvw/"]
+      </tools>
 
-      - name: markdown_to_word_doc
-        description: Convert Markdown to a Word (.docx) file with GitHub-flavored Markdown features preserved. Automatically removes common leading indentation so pasted/triple-quoted Markdown isn’t treated as a code block.
-        input:
-          markdown: string
-          output_path: string
-        examples:
-          - markdown: "# Title\n\n- [x] done\n- [ ] todo\n"
-          - markdown: |
-              # Report
-              | A | B |
-              | - | - |
-              | 1 | 2 |
-    </tools>
+      <tool_usage_rules>
+        1. You MUST use the Search Instagram tool at least once to discover public Instagram posts related to the campaign
+          theme, brand context, and/or target audience interests.
+        2. After using Search Instagram, you MUST extract Instagram post data using the Open Instagram Post Page tool for a
+          subset of relevant URLs.
+        3. You MUST reference the exact tool outputs (usernames, captions, image URLs, and any other metadata) in your analysis
+          and in the constructed DiscoveryDataset.
+        4. You MUST NOT rely solely on internal knowledge; your findings MUST be based on the Instagram-related tool outputs.
+      </tool_usage_rules>
 
-    <tool_usage_rules>
-      1. You MUST use the Search Internet tool at least once.
-      2. You MUST extract webpage content using the Open Pages tool after Search Internet.
-      3. You MUST use the Search Instagram tool at least once.
-      4. You MUST extract instagram post data using the Open Instagram Post Page tool after Search Instagram.
-      5. You MUST reference the exact tool outputs in your analysis.
-      6. You MUST NOT rely solely on internal knowledge.
-    </tool_usage_rules>
+      <your_task>
+        Based on the context, you are to perform Instagram-based discovery research tied to "{theme}":
+          1. Use the Search Instagram tool with queries combining:
+            - The campaign theme
+            - The brand’s space or category
+            - Keywords reflecting the target audience’s interests and language
+          2. From the search results, select relevant Instagram post URLs that:
+            - Are thematically aligned with the campaign direction.
+            - Represent potential competitors, creators, or benchmark posts.
+          3. Use the Open Instagram Post Page tool on the selected URLs to retrieve:
+            - Poster’s username
+            - Post caption
+            - Image URL(s)
+            - Any available basic engagement context (likes/comments counts or qualitative notes if present in tool output)
+          4. For each post, record:
+            - Username
+            - Post URL
+            - Caption text
+            - Image URL(s)
+            - Any available engagement signals (quantitative or qualitative)
+            - A short note on why the post is relevant to the campaign theme and target audience
+          5. Identify and label:
+            - Relevant creators (usernames) who appear influential or well-aligned with the brand and theme.
+            - Competitor or benchmark brand accounts if they show up in the results.
+          6. Package all of this into a single DiscoveryDataset object with enough structure for later synthesis, including:
+            - The theme, brand, and target audience context
+            - A list of Instagram posts with metadata (username, caption, image URLs, post URL, engagement context)
+            - A list of relevant creators and competitor accounts with brief notes
+            - A clear indication that this dataset’s source_type is "instagram".
+      </your_task>
 
-    <your_task>
-      Based on the context, you are to prepare a report summarizing the competitive landscape, emerging trends tied to "{theme}", and successful examples/reference:
-        1. Your report should be formatted as markdown without '```'.
-        2. Learn about topics or concepts related to the campaign theme using the Search Internet tool to help you.
-        3. Identify 1-3 relevant competitors in the space using the Search Internet tool to help you.
-        4. For any relevant topics related to the campaign theme, use the Search Instagram tool to gather data on recent posts related to the campaign theme
-        5. Analyze the data collected to identify patterns in content types, engagement tactics, visual styles, and posting frequencies that align with the brand and appeal to the target audience.
-        6. You MUST generate a comprehensive and structured report summarizing your findings, including actionable insights, recommendations and references for the upcoming campaign.
-        7. You MUST use the Markdown to Word Doc tool to convert the report into a Word (.docx) file. Don't include output_path in the input.
-    </your_task>
+      <additional_instructions>
+        - When referencing Instagram posts, always include the poster's username and the post's URL in the stored data so that
+          they can be surfaced later as references.
+      </additional_instructions>
+    
+    expected_output: >
+      A DiscoveryDataset object appended to the discovery_datasets list in state that:
+        - Is explicitly marked as Instagram-based discovery (e.g., source_type = "instagram").
+        - Includes campaign context:
+          - theme
+          - brand_description
+          - target_audience_description
+          - start_date and end_date
+        - Contains a collection of Instagram posts, each with:
+          - username
+          - post_url
+          - caption
+          - image_urls (one or more)
+          - any available engagement context (e.g., like/comment counts or qualitative notes)
+          - a short relevance_note explaining why the post matters for the campaign
+        - Lists relevant creators and competitor/benchmark accounts (if any) with:
+          - username or account handle
+          - example post_url(s)
+          - short description of their style, positioning, or relevance to the theme
+        - Is structured so that future tasks can easily consume it to analyze content types, engagement tactics, visual styles,
+          and posting patterns that resonate with the target audience.
 
-    <additional_instructions>
-      - When referencing instagram posts, include poster's username and post's url in the output.
-    </additional_instructions>
+  research_synthesis_report:
+    reads:
+      - field: discovery_datasets
+        type: DiscoveryDataset[]
+        cardinality: at_least_one
 
-  expected_output: >
-    Generate a report that includes the following sections:
-    - Executive summary
-    - Competitive landscape
-    - Emerging trends
-    - Successful examples/references
-    - Recommendations
-    - References
+      - field: theme
+        type: string
+        cardinality: required
+      - field: brand_description
+        type: string
+        cardinality: required
+      - field: target_audience_description
+        type: string
+        cardinality: required
+      - field: start_date
+        type: date
+        cardinality: required
+      - field: end_date
+        type: date
+        cardinality: required
+    writes:
+      - field: marketing_research
+        type: MarketingResearch
+        mode: replace
+    key: research_synthesis_report
+    agent: research_synthesis_agent
+    name: Research Synthesis Report
+    description: >
+      <important_rules>
+        1. You must not make up any information. Only include information that you are confident about.
+        2. You must not include any information that is not related to the topic or the brand.
+        3. You must not include any information that is not supported by the data you have collected.
+        4. You must not include any information that is not supported by the tools you have used.
+        5. You must not include any information that is not supported by the data you have collected.
+        6. You must not include any information that is not supported by the tools you have used.
+        7. You must not include any information that is not supported by the data you have collected.
+        8. You must not include any information that is not supported by the tools you have used.
+      </important_rules>
+      <context>
+        1. You are to synthesize all available discovery datasets (web, Instagram, and any future sources) into a structured
+          marketing research report tied to the marketing campaign theme:
+          <theme>{theme}</theme>
+        2. The brand you are preparing the market research for is described as
+          <BRAND_DESCRIPTION>{brand_description}</BRAND_DESCRIPTION>.
+        3. The target audience is described as
+          <TARGET_AUDIENCE_DESCRIPTION>{target_audience_description}</TARGET_AUDIENCE_DESCRIPTION>.
+        4. You are preparing market research to guide the content strategy for the marketing campaign which will take place
+          from {start_date} to {end_date}.
+        5. Your primary evidence comes from the discovery_datasets field, which aggregates outputs from web_discovery,
+          instagram_discovery, and any additional discovery tasks.
+      </context>
 
-    Write the full report in markdown.
-    Do NOT describe whether the report meets requirements.
-    Do NOT evaluate or summarize the structure.
-    Only output the report itself.
-    Formatted as markdown without '```'.
-
-content_strategy:
-  description: >
-    <important_rules>
-      1. You must not make up any information. Only include information that you are confident about.
-      2. You must not include any information that is not related to the topic or the brand.
-    </important_rules>
-
-    <marketing_research>
-      {marketing_research}
-    </marketing_research>
-
-    <context>
-      1. You are to develop a content strategy for a marketing campaign to be executed on instagram from {start_date} to {end_date}.
-      2. The brand you are developing the content strategy for is described as <BRAND_DESCRIPTION>{brand_description}</BRAND_DESCRIPTION>.
-      3. The target audience is described as <TARGET_AUDIENCE_DESCRIPTION>{target_audience_description}</TARGET_AUDIENCE_DESCRIPTION>.
-      4. You are developing the content strategy to be used to guide the social media schedule for the marketing campaign.
-    </context>
-
-    <your_task>
-      Based on the context, you are to come up with a high-level content strategy for the marketing campaign that MUST be grounded in the marketing research
-        1. Determine an appropriate phase for the strategy. If the campaign is long you can plan per month or per week, if the campaign is relatively short the phase can
-        be day. The marketing campaign should start on the 1st day of the month or 1st Monday, whichever is closer to {start_date}.
-        2. Determine the tone and voice that will resonate with the target audience while reflecting the brand's identity.
-        3. For each phase of the marketing campaign define:
-          - objectives (awareness, engagement, CTA where applicable)
-          - key messages
-          - content types (posts, stories, reels)
-    </your_task>
-
-  expected_output: >
-    A structured content plan containing:
-    - Executive summary of the content strategy
-    - A calendar overview with theme/concept, objective, and suggested posting cadence
-    Formatted as markdown without '```'.
-
-social_media_schedule:
-  description: >
-    <important_rules>
-      1. You must not make up any information. Only include information that you are confident about.
-      2. You must not include any information that is not related to the topic or the brand.
-    </important_rules>
-
-    <marketing_research>
-      {marketing_research}
-    </marketing_research>
-
-    <content_strategy>
-      {content_strategy}
-    </content_strategy>
-
-    <context>
-      1. You are to develop a social media schedule for a marketing campaign to be executed on instagram from {start_date} to {end_date}.
-      2. The brand you are developing the content strategy for is described as <BRAND_DESCRIPTION>{brand_description}</BRAND_DESCRIPTION>.
-      3. The target audience is described as <TARGET_AUDIENCE_DESCRIPTION>{target_audience_description}</TARGET_AUDIENCE_DESCRIPTION>.
-      4. You are developing the social media schedule to be used to guide the content creation, including copy and visual design, for the marketing campaign.
-    </context>
-
-    <tools>
-      - name: html_to_excel
-        description: Converts an HTML table string into an Excel (.xlsx) file with row/col spans preserved as merged cells.
-        input:
-          html_str: string
-          output_path: string
+      <tools>
+        - name: markdown_to_word_doc
+          description: Convert Markdown to a Word (.docx) file with GitHub-flavored Markdown features preserved. Automatically
+            removes common leading indentation so pasted/triple-quoted Markdown isn’t treated as a code block.
+          input:
+            markdown: string
+            output_path: string
           examples:
-            - html_str: """
-              <table>
-                <tr><td>Hello</td><td>World</td></tr>
-                <tr><td>Hello</td><td>World</td></tr>
-              """, output_path: "./social_media_schedule.xlsx"
-    </tools>
+            - markdown: "# Title\n\n- [x] done\n- [ ] todo\n"
+            - markdown: |
+                # Report
+                | A | B |
+                | - | - |
+                | 1 | 2 |
+      </tools>
 
-    <tools_usage_rules>
-      1. You MUST use the HTML to Excel tool to convert the HTML table string into an Excel (.xlsx) file with row/col spans preserved as merged cells.
-    </tools_usage_rules>
+      <tool_usage_rules>
+        1. You MUST base your analysis primarily on the contents of discovery_datasets; you MUST NOT introduce claims that are
+          not supported by those datasets.
+        2. You MAY draw simple logical conclusions and interpretations as long as they are clearly grounded in patterns or
+          evidence observed in discovery_datasets.
+        3. You MUST use the Markdown to Word Doc tool to convert the final markdown research report into a Word (.docx) file.
+          Don't include output_path in the input.
+        4. You MUST NOT rely solely on internal knowledge; all concrete examples, competitor mentions, and references must be
+          traceable back to the discovery_datasets or the Markdown-to-Word conversion step.
+      </tool_usage_rules>
 
-    <sample_schedule>
-      <table border="1" cellpadding="6" cellspacing="0">
-        <thead>
-          <tr>
-            <th>Week</th>
-            <th>Posting Cadence</th>
-            <th>Post Type</th>
-            <th>Date</th>
-            <th>Theme/Concept</th>
-            <th>Objective</th>
-            <th>Description</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Week 1 (5 rows = 3 posts + 2 stories) -->
-          <tr>
-            <td rowspan="5">1</td>
-            <td rowspan="5">3 posts, 2 stories; Post times 11am, 6pm</td>
-            <td>Post</td>
-            <td>01-Nov-2025</td>
-            <td>Welcome to Semester &amp; Campus Life</td>
-            <td>Kickstart engagement; introduce semester vibe</td>
-            <td>Vibrant shots of campus, student groups &amp; iconic spots</td>
-            <td>Canva templates ready</td>
-          </tr>
-          <tr>
-            <td>Post</td>
-            <td>03-Nov-2025</td>
-            <td>Campus Life Highlights</td>
-            <td>Showcase energetic environment and increase relatability</td>
-            <td>Student life &amp; campus hotspots reel</td>
-            <td>Include trending audio</td>
-          </tr>
-          <tr>
-            <td>Post</td>
-            <td>05-Nov-2025</td>
-            <td>Clubs &amp; Student Culture</td>
-            <td>Increase awareness of extracurricular opportunities</td>
-            <td>Spotlight on student clubs &amp; culture</td>
-            <td>Highlight campus diversity</td>
-          </tr>
-          <tr>
-            <td>Story</td>
-            <td>02-Nov-2025</td>
-            <td>Welcome Season</td>
-            <td>Share excitement in real-time and drive early engagement</td>
-            <td>Orientation welcome snippets</td>
-            <td>Tag student ambassadors</td>
-          </tr>
-          <tr>
-            <td>Story</td>
-            <td>04-Nov-2025</td>
-            <td>Excitement Polls</td>
-            <td>Gather insights on what students want content about</td>
-            <td>Poll: “What are you most excited for?”</td>
-            <td>Campus GIF stickers</td>
-          </tr>
+      <your_task>
+        Based on the context and all available discovery_datasets, you are to prepare a comprehensive marketing research
+        report for "{theme}":
 
-          <!-- Week 2 (8 rows = 3 posts + 5 stories) -->
-          <tr>
-            <td rowspan="8">2</td>
-            <td rowspan="8">3 posts, 5 stories; Post times 12pm, 7pm</td>
-            <td>Post</td>
-            <td>07-Nov-2025</td>
-            <td>Signature Events Preview</td>
-            <td>Build excitement for upcoming campus festivals</td>
-            <td>Teasers of festival themes &amp; prep visuals</td>
-            <td>Add countdown sticker</td>
-          </tr>
-          <tr>
-            <td>Post</td>
-            <td>09-Nov-2025</td>
-            <td>Festival Hype</td>
-            <td>Boost anticipation and awareness of main highlights</td>
-            <td>Hype poster for main festival highlight</td>
-            <td>Include teaser CTA</td>
-          </tr>
-          <tr>
-            <td>Post</td>
-            <td>11-Nov-2025</td>
-            <td>Throwback Inspiration</td>
-            <td>Use nostalgia and credibility to encourage RSVPs</td>
-            <td>Trailer/snippets from past editions</td>
-            <td>Encourage RSVPs</td>
-          </tr>
-          <tr>
-            <td>Story</td>
-            <td>08-Nov-2025</td>
-            <td>Behind the Scenes</td>
-            <td>Provide insider access to drive engagement</td>
-            <td>Behind-the-scenes look</td>
-            <td>Tag organising committee</td>
-          </tr>
-          <tr>
-            <td>Story</td>
-            <td>10-Nov-2025</td>
-            <td>Event Voices</td>
-            <td>Increase participation by spotlighting student opinions</td>
-            <td>Quick vox pops on favourite past events!</td>
-            <td>Include Swipe-up link</td>
-          </tr>
-          <tr>
-            <td>Story</td>
-            <td>12-Nov-2025</td>
-            <td>Talent &amp; Vendor Showcase</td>
-            <td>Promote partners/performers to drive festival credibility</td>
-            <td>Sneak peek on vendors/performers</td>
-            <td>Short Q&amp;A quiz</td>
-          </tr>
-          <tr>
-            <td>Story</td>
-            <td>13-Nov-2025</td>
-            <td>Anticipation Polls</td>
-            <td>Capture preferences for better CG-led event content</td>
-            <td>Poll: favourite activity to attend</td>
-            <td>Encourage sharing</td>
-          </tr>
-          <tr>
-            <td>Story</td>
-            <td>14-Nov-2025</td>
-            <td>Guess the Performer</td>
-            <td>Gamify engagement with curiosity hooks</td>
-            <td>Trivia: Guess who’s performing?</td>
-            <td>Reveal tomorrow</td>
-          </tr>
+          1. Read and synthesize all DiscoveryDataset objects in discovery_datasets, including but not limited to:
+            - Web-based discovery (source_type = "web")
+            - Instagram-based discovery (source_type = "instagram")
+            - Any additional future discovery sources that may be present
+          2. Identify topics and concepts related to the campaign theme that are supported by the datasets.
+          3. Identify 1–3 (or more, if present in the datasets) relevant competitors and benchmark brands, describing:
+            - Their positioning
+            - Notable tactics or themes
+            - Any relevant channels or content formats observed
+          4. Analyze the collected data to identify:
+            - Patterns in content types (e.g., educational, inspirational, promotional, user-generated, etc.)
+            - Engagement tactics (e.g., hooks, CTAs, giveaways, collaborations, trends)
+            - Visual styles (e.g., color palettes, composition, motion vs. static, design motifs)
+            - Posting frequencies and timing patterns where observable
+          5. Use examples from the datasets (especially Instagram posts and key webpages) as references, and when specifically
+            referencing Instagram posts in the report, include:
+            - Poster’s username
+            - Post URL
+          6. Generate a comprehensive, markdown-friendly report that includes, at minimum, the following sections:
+            - Executive summary
+            - Competitive landscape
+            - Emerging trends
+            - Successful examples/references
+            - Recommendations
+            - References
+          7. After generating the markdown report, use the Markdown to Word Doc tool to convert it into a Word (.docx) file
+            (without specifying output_path in the input).
+          8. Store both the markdown report (and information about the generated Word document, if applicable) in the
+            marketing_research field in state as a MarketingResearch object that can be consumed by downstream steps.
+      </your_task>
 
-          <!-- Week 3 (9 rows = 3 posts + 6 stories) -->
-          <tr>
-            <td rowspan="9">3</td>
-            <td rowspan="9">3 posts, 6 stories; Post times 11am, 5pm</td>
-            <td>Post</td>
-            <td>15-Nov-2025</td>
-            <td>Student-Generated Content Showcase</td>
-            <td>Empower student voices &amp; creativity</td>
-            <td>Feature standout student works</td>
-            <td>Include submission CTA</td>
-          </tr>
-          <tr>
-            <td>Post</td>
-            <td>17-Nov-2025</td>
-            <td>Creative Spotlight</td>
-            <td>Highlight the diversity of student talent</td>
-            <td>Carousel: Student art/design highlights</td>
-            <td>Tag creators</td>
-          </tr>
-          <tr>
-            <td>Post</td>
-            <td>19-Nov-2025</td>
-            <td>Creator Deep Dive</td>
-            <td>Increase relatability through personal storytelling</td>
-            <td>Short-format documentary clip of a creator</td>
-            <td>High-share value</td>
-          </tr>
-          <tr>
-            <td>Story</td>
-            <td>16-Nov-2025</td>
-            <td>Creator Journey</td>
-            <td>Humanise creations and inspire participation</td>
-            <td>Behind-the-scenes of creators</td>
-            <td>Tag participants</td>
-          </tr>
-          <tr>
-            <td>Story</td>
-            <td>18-Nov-2025</td>
-            <td>Live Feature Voting</td>
-            <td>Boost real-time participation and feedback</td>
-            <td>Live voting prompt for features</td>
-            <td>Engagement sticker</td>
-          </tr>
-          <tr>
-            <td>Story</td>
-            <td>20-Nov-2025</td>
-            <td>Project Selection Poll</td>
-            <td>Drive decision-making engagement</td>
-            <td>Poll: which project to feature next?</td>
-            <td>Encourage reposts</td>
-          </tr>
-          <tr>
-            <td>Story</td>
-            <td>21-Nov-2025</td>
-            <td>Student Showcase Highlights</td>
-            <td>Sustain momentum around creative submissions</td>
-            <td>Slideshow of student entries</td>
-            <td>Include CTA to vote/share</td>
-          </tr>
-          <tr>
-            <td>Story</td>
-            <td>22-Nov-2025</td>
-            <td>Creator Introductions</td>
-            <td>Help audience connect with featured students</td>
-            <td>“Meet the creator” mini interviews</td>
-            <td>Add handle mentions</td>
-          </tr>
-          <tr>
-            <td>Story</td>
-            <td>23-Nov-2025</td>
-            <td>Showcase Countdown</td>
-            <td>Build hype toward final reveal</td>
-            <td>Countdown to final showcase post</td>
-            <td>Build hype</td>
-          </tr>
-        </tbody>
-      </table>
-    </sample_schedule>
+      <additional_instructions>
+        - When referencing Instagram posts in the report, always include the poster's username and the post's URL in the
+          text.
+        - Ensure the report is written in clear, structured markdown and is suitable for direct sharing with marketers or
+          stakeholders planning the campaign.
+      </additional_instructions>
 
-    <your_task>
-      Based on the context, you are to come up with a high-level weekly social media schedule for the marketing campaign that MUST be grounded in the content strategy
-      for the duration of the campaign.
-        1. Determine the total number of weeks in the campaign.
-        2. For each week:
-          - Determine the appropriate number of posts and stories to post. You can reference the posting cadence of the content strategy.
-        3. For each post:
-          - Determine the Theme/Concept for the post. It can be the based on the content strategy but be creative to also include
-          other themes or concepts that are relevant to the campaign. For example, if this week's theme is "Countdown to the New Year", you can also include
-          themes like "New Year's Resolutions", "New Year's Eve", "New Year's Day", "Behind the scenes of the New Year's Eve party", etc.
-          - Determine the date and time to post the post/story.
-          - Determine the Objective and Key Messages for the post/story.
-          - Generate a description that WILL be used to guide copy generation and visual design/image generation. This should be very detailed and specific.
-          - Generate notes that will inform the user of any additional information that is not covered in the description. For example, Tag Student Ambassadors,
-          Tag participants, Add Countdown Sticker, Include Submission CTA, Use Featured Stickers, Use Holiday Themed Stickers, Use GIF Stickers, Use Swipe-up link,
-          Use CTA to vote/share, Add handle mentions, Build hype, etc.
-        4. Determine the posting cadence for the week.
-        5. Generate a summary of the social media schedule for the campaign.
-        6. You MUST use the HTML to Excel tool to convert the HTML table string into an Excel (.xlsx) file with row/col spans preserved as merged cells. Don't include output_path in the input.
-        Your table MUST follow the sample schedule format.
-    </your_task>
-  expected_output: >
-    A HTML table string that follows the sample schedule format that is converted to an Excel file using the HTML to Excel tool.
+    expected_output: >
+      A DiscoveryDataset object with the following structure:
+        - Contains the full research report written in markdown with, at minimum, the following sections:
+          - Executive summary
+          - Competitive landscape
+          - Emerging trends
+          - Successful examples/references
+          - Recommendations
+          - References
+        - Clearly states the campaign context:
+          - theme
+          - brand_description
+          - target_audience_description
+          - start_date and end_date
+        - Explicitly references insights derived from the discovery_datasets, including:
+          - Web-based findings (topics, key pages, competitors) from web_discovery
+          - Instagram-based findings (posts, creators, competitors) from instagram_discovery
+          - Any additional discovery sources if present
+        - Includes specific examples and references, where:
+          - Instagram posts are cited with username and post URL.
+          - Key web pages are cited with title/label and URL.
+        - Summarizes:
+          - The competitive landscape around the theme.
+          - Emerging trends and audience-relevant patterns.
+          - Successful examples and best practices tied to the brand and target audience.
+          - Actionable recommendations for content strategy during the campaign period.
+        - Is accompanied by a successfully generated Word (.docx) version of the report created via the markdown_to_word_doc
+          tool (with the conversion having been performed without specifying output_path in the input).

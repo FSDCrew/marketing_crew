@@ -30,7 +30,7 @@ def test_flow():
     print(f"\nFinal state summary:")
     print(f"  Flow ID: {flow.state.flow_id}")
     print(f"  Run ID: {flow.state.run_id}")
-    print(f"  Research insights: {len(flow.state.research_insights or '')} chars")
+    print(f"  Marketing research: {len(flow.state.marketing_research or '')} chars")
     print(f"  Content strategy: {len(flow.state.content_strategy or '')} chars")
     print(f"  Social media schedule: {len(flow.state.social_media_schedule or '')} chars")
 
